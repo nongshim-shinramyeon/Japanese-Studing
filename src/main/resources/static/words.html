@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Words | Japanese King</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-badge">JK</span>
+            <span>Japanese King</span>
+        </a>
+        <nav class="nav">
+            <a href="/">Home</a>
+            <a class="active" href="/words.html">Words</a>
+            <a href="/grammar-notes.html">Grammar Notes</a>
+            <a href="/community.html">Community</a>
+            <a href="/h2-console">H2 Console</a>
+        </nav>
+    </header>
+
+    <div class="layout">
+        <section class="panel">
+            <p class="eyebrow">Word Editor</p>
+            <h2>Save a word</h2>
+            <p class="muted">Create a new entry or update an existing one.</p>
+            <div id="word-message" class="message">Results will appear here after you save, update, or delete a word.</div>
+            <form id="word-form">
+                <div class="field">
+                    <label for="japanese">Japanese</label>
+                    <input id="japanese" name="japanese" placeholder="e.g. benkyou">
+                </div>
+                <div class="field">
+                    <label for="reading">Reading</label>
+                    <input id="reading" name="reading" placeholder="e.g. べんきょう">
+                </div>
+                <div class="field">
+                    <label for="meaning">Meaning</label>
+                    <input id="meaning" name="meaning" placeholder="e.g. study">
+                </div>
+                <div class="field">
+                    <label for="partOfSpeech">Part of speech</label>
+                    <input id="partOfSpeech" name="partOfSpeech" placeholder="e.g. noun">
+                </div>
+                <div class="field">
+                    <label for="exampleSentence">Example sentence</label>
+                    <textarea id="exampleSentence" name="exampleSentence" placeholder="Write an example sentence"></textarea>
+                </div>
+                <div class="field">
+                    <label for="jlptLevel">JLPT level</label>
+                    <select id="jlptLevel" name="jlptLevel">
+                        <option value="N5">N5</option>
+                        <option value="N4">N4</option>
+                        <option value="N3">N3</option>
+                        <option value="N2">N2</option>
+                        <option value="N1">N1</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="studyStatus">Study status</label>
+                    <select id="studyStatus" name="studyStatus">
+                        <option value="NEW">NEW</option>
+                        <option value="LEARNING">LEARNING</option>
+                        <option value="REVIEW_NEEDED">REVIEW_NEEDED</option>
+                        <option value="MASTERED">MASTERED</option>
+                    </select>
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="primary">Save word</button>
+                    <button type="button" id="cancel-word-edit" class="secondary" hidden>Cancel edit</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="table-wrap">
+            <div class="table-header">
+                <div>
+                    <p class="eyebrow">Word Library</p>
+                    <h2>Saved words</h2>
+                    <p class="table-note">Total items: <strong id="word-count">0</strong></p>
+                </div>
+                <form id="word-filters" class="filters">
+                    <select name="jlptLevel">
+                        <option value="">All levels</option>
+                        <option value="N5">N5</option>
+                        <option value="N4">N4</option>
+                        <option value="N3">N3</option>
+                        <option value="N2">N2</option>
+                        <option value="N1">N1</option>
+                    </select>
+                    <select name="studyStatus">
+                        <option value="">All statuses</option>
+                        <option value="NEW">NEW</option>
+                        <option value="LEARNING">LEARNING</option>
+                        <option value="REVIEW_NEEDED">REVIEW_NEEDED</option>
+                        <option value="MASTERED">MASTERED</option>
+                    </select>
+                    <button type="submit" class="secondary">Apply</button>
+                    <button type="button" id="word-reset-filters" class="secondary">Reset</button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Word</th>
+                    <th>Meaning</th>
+                    <th>Part of speech</th>
+                    <th>Study info</th>
+                    <th>Example</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="word-table-body"></tbody>
+            </table>
+
+            <div id="word-empty" class="empty" hidden>No words yet. Add your first item from the form on the left.</div>
+
+            <div class="table-header">
+                <div class="pager">
+                    <button type="button" id="word-prev-page" class="secondary">Previous</button>
+                    <button type="button" id="word-next-page" class="secondary">Next</button>
+                </div>
+                <p class="table-note">Page: <strong id="word-page">1 / 1</strong></p>
+            </div>
+        </section>
+    </div>
+</div>
+<script type="module" src="/js/words.js"></script>
+</body>
+</html>

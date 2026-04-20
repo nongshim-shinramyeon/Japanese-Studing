@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community | Japanese King</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-badge">JK</span>
+            <span>Japanese King</span>
+        </a>
+        <nav class="nav">
+            <a href="/">Home</a>
+            <a href="/words.html">Words</a>
+            <a href="/grammar-notes.html">Grammar Notes</a>
+            <a class="active" href="/community.html">Community</a>
+            <a href="/h2-console">H2 Console</a>
+        </nav>
+    </header>
+
+    <div class="layout">
+        <section class="panel">
+            <p class="eyebrow">Post Editor</p>
+            <h2>Write a post</h2>
+            <p class="muted">Use this area to create or edit a community post.</p>
+            <div id="community-post-message" class="message">Post results will appear here.</div>
+            <form id="community-post-form">
+                <div class="field">
+                    <label for="postAuthorName">Author</label>
+                    <input id="postAuthorName" name="authorName" placeholder="Your name">
+                </div>
+                <div class="field">
+                    <label for="postTitle">Title</label>
+                    <input id="postTitle" name="title" placeholder="Write a title">
+                </div>
+                <div class="field">
+                    <label for="postContent">Content</label>
+                    <textarea id="postContent" name="content" placeholder="Write your post"></textarea>
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="primary">Save post</button>
+                    <button type="button" id="cancel-post-edit" class="secondary" hidden>Cancel edit</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="list-panel">
+            <section class="table-wrap detail-card">
+                <div>
+                    <p class="eyebrow">Post List</p>
+                    <h2>Community board</h2>
+                    <p class="table-note">Select a post to open its comments and replies.</p>
+                </div>
+                <div id="community-post-list" class="list-panel"></div>
+                <div id="community-post-empty" class="empty" hidden>No posts yet. Create the first one from the panel on the left.</div>
+                <div class="pager">
+                    <button type="button" id="community-prev-posts" class="secondary">Previous</button>
+                    <button type="button" id="community-next-posts" class="secondary">Next</button>
+                    <span class="table-note">Page: <strong id="community-post-page">1 / 1</strong></span>
+                </div>
+            </section>
+
+            <section class="table-wrap detail-card">
+                <div>
+                    <p class="eyebrow">Discussion</p>
+                    <h2 id="community-selected-title">Select a post</h2>
+                    <div id="community-selected-meta" class="meta"></div>
+                </div>
+                <p id="community-selected-content" class="muted">Once you pick a post, its content and comments will appear here.</p>
+                <div class="button-row">
+                    <button type="button" id="community-edit-post" class="secondary" disabled>Edit post</button>
+                    <button type="button" id="community-delete-post" class="danger" disabled>Delete post</button>
+                </div>
+                <div class="section-divider"></div>
+                <div>
+                    <p class="eyebrow">Comment Editor</p>
+                    <div id="community-comment-message" class="message">Comment results will appear here.</div>
+                    <form id="community-comment-form">
+                        <input type="hidden" id="commentParentId" name="parentId">
+                        <div class="field">
+                            <label for="commentAuthorName">Author</label>
+                            <input id="commentAuthorName" name="authorName" placeholder="Your name">
+                        </div>
+                        <div class="field">
+                            <label for="commentContent">Comment</label>
+                            <textarea id="commentContent" name="content" placeholder="Write a comment or reply"></textarea>
+                        </div>
+                        <p id="community-reply-target" class="table-note">Reply target: none</p>
+                        <div class="button-row">
+                            <button type="submit" class="primary" id="community-comment-submit" disabled>Save comment</button>
+                            <button type="button" id="cancel-comment-edit" class="secondary" hidden>Cancel edit</button>
+                            <button type="button" id="cancel-reply-target" class="secondary" hidden>Clear reply target</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="section-divider"></div>
+                <div class="comment-list" id="community-comment-list"></div>
+                <div id="community-comment-empty" class="empty" hidden>No comments yet. Start the conversation.</div>
+                <div class="pager">
+                    <button type="button" id="community-prev-comments" class="secondary" disabled>Previous</button>
+                    <button type="button" id="community-next-comments" class="secondary" disabled>Next</button>
+                    <span class="table-note">Page: <strong id="community-comment-page">1 / 1</strong></span>
+                </div>
+            </section>
+        </section>
+    </div>
+</div>
+<script type="module" src="/js/community.js"></script>
+</body>
+</html>

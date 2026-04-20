@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Notes | Japanese King</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-badge">JK</span>
+            <span>Japanese King</span>
+        </a>
+        <nav class="nav">
+            <a href="/">Home</a>
+            <a href="/words.html">Words</a>
+            <a class="active" href="/grammar-notes.html">Grammar Notes</a>
+            <a href="/community.html">Community</a>
+            <a href="/h2-console">H2 Console</a>
+        </nav>
+    </header>
+
+    <div class="layout">
+        <section class="panel">
+            <p class="eyebrow">Grammar Editor</p>
+            <h2>Save a grammar note</h2>
+            <p class="muted">Keep patterns, meanings, and explanations together.</p>
+            <div id="grammar-message" class="message">Results will appear here after you save, update, or delete a note.</div>
+            <form id="grammar-form">
+                <div class="field">
+                    <label for="title">Title</label>
+                    <input id="title" name="title" placeholder="e.g. te shimau">
+                </div>
+                <div class="field">
+                    <label for="patternExpression">Pattern</label>
+                    <input id="patternExpression" name="patternExpression" placeholder="e.g. verb te-form + shimau">
+                </div>
+                <div class="field">
+                    <label for="meaning">Meaning</label>
+                    <input id="meaning" name="meaning" placeholder="e.g. to end up doing">
+                </div>
+                <div class="field">
+                    <label for="explanation">Explanation</label>
+                    <textarea id="explanation" name="explanation" placeholder="Explain how the pattern works"></textarea>
+                </div>
+                <div class="field">
+                    <label for="exampleSentence">Example sentence</label>
+                    <textarea id="exampleSentence" name="exampleSentence" placeholder="Write an example sentence"></textarea>
+                </div>
+                <div class="field">
+                    <label for="grammar-jlptLevel">JLPT level</label>
+                    <select id="grammar-jlptLevel" name="jlptLevel">
+                        <option value="N5">N5</option>
+                        <option value="N4">N4</option>
+                        <option value="N3">N3</option>
+                        <option value="N2">N2</option>
+                        <option value="N1">N1</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="grammar-studyStatus">Study status</label>
+                    <select id="grammar-studyStatus" name="studyStatus">
+                        <option value="NEW">NEW</option>
+                        <option value="LEARNING">LEARNING</option>
+                        <option value="REVIEW_NEEDED">REVIEW_NEEDED</option>
+                        <option value="MASTERED">MASTERED</option>
+                    </select>
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="primary">Save note</button>
+                    <button type="button" id="cancel-grammar-edit" class="secondary" hidden>Cancel edit</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="table-wrap">
+            <div class="table-header">
+                <div>
+                    <p class="eyebrow">Grammar Library</p>
+                    <h2>Saved notes</h2>
+                    <p class="table-note">Total items: <strong id="grammar-count">0</strong></p>
+                </div>
+                <form id="grammar-filters" class="filters">
+                    <select name="jlptLevel">
+                        <option value="">All levels</option>
+                        <option value="N5">N5</option>
+                        <option value="N4">N4</option>
+                        <option value="N3">N3</option>
+                        <option value="N2">N2</option>
+                        <option value="N1">N1</option>
+                    </select>
+                    <select name="studyStatus">
+                        <option value="">All statuses</option>
+                        <option value="NEW">NEW</option>
+                        <option value="LEARNING">LEARNING</option>
+                        <option value="REVIEW_NEEDED">REVIEW_NEEDED</option>
+                        <option value="MASTERED">MASTERED</option>
+                    </select>
+                    <button type="submit" class="secondary">Apply</button>
+                    <button type="button" id="grammar-reset-filters" class="secondary">Reset</button>
+                </form>
+            </div>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Meaning</th>
+                    <th>Explanation</th>
+                    <th>Study info</th>
+                    <th>Example</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody id="grammar-table-body"></tbody>
+            </table>
+
+            <div id="grammar-empty" class="empty" hidden>No grammar notes yet. Add your first one from the form on the left.</div>
+
+            <div class="table-header">
+                <div class="pager">
+                    <button type="button" id="grammar-prev-page" class="secondary">Previous</button>
+                    <button type="button" id="grammar-next-page" class="secondary">Next</button>
+                </div>
+                <p class="table-note">Page: <strong id="grammar-page">1 / 1</strong></p>
+            </div>
+        </section>
+    </div>
+</div>
+<script type="module" src="/js/grammar-notes.js"></script>
+</body>
+</html>
