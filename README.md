@@ -1,22 +1,20 @@
-# Japanese-Studing
-=======
 # Japanese King
 
 Simple Spring Boot web app for Japanese study.
 
-This project has three parts:
+This project includes:
 - words
 - grammar notes
 - community
 
-## What you can do
+## Features
 
 - save, edit, and delete words
 - save, edit, and delete grammar notes
-- create posts in the community board
-- write comments and replies
-- edit and delete comments
-- browse lists with pagination
+- create, edit, and delete community posts
+- create, edit, and delete comments
+- reply to comments
+- pagination on list screens
 
 ## Tech
 
