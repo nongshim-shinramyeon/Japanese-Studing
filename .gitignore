@@ -26,6 +26,11 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 
+### Local runtime files ###
+data/
+bootRun.out
+bootRun.err
+
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
