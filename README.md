@@ -1,4 +1,4 @@
-# Japanese King
+# Japanese Studying
 
 Simple Spring Boot web app for Japanese study.
 
