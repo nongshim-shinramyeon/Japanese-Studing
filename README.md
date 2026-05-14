@@ -43,6 +43,32 @@ Pages:
 
 Stop the server with `Ctrl + C`.
 
+## Docker
+
+Build and run the app locally with Docker:
+
+```powershell
+docker compose up --build
+```
+
+Open:
+- Home: [http://localhost:8080/](http://localhost:8080/)
+- H2 Console: [http://localhost:8080/h2-console](http://localhost:8080/h2-console)
+
+Run in the background:
+
+```powershell
+docker compose up -d --build
+```
+
+Stop the container:
+
+```powershell
+docker compose down
+```
+
+The H2 database is stored in the Docker volume `japanese-studying-data`.
+
 ## Test
 
 ```powershell

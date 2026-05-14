@@ -1,0 +1,13 @@
+.git
+.gradle
+.gradle-user-home
+.idea
+build
+data
+out
+bin
+*.iml
+bootRun.out
+bootRun.err
+docker-compose.yml
+README.md
