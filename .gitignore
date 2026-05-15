@@ -30,6 +30,7 @@ out/
 data/
 bootRun.out
 bootRun.err
+app.jar
 
 ### NetBeans ###
 /nbproject/private/
