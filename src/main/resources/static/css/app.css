@@ -278,6 +278,42 @@ button:hover,
     padding: 24px 24px 0;
 }
 
+.table-header.compact {
+    padding: 0;
+}
+
+.table-header.bottom {
+    margin-top: 18px;
+}
+
+.word-browser {
+    display: grid;
+    gap: 18px;
+}
+
+.level-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.level-tab {
+    background: white;
+    color: var(--text-soft);
+    border: 1px solid var(--line);
+    min-width: 66px;
+}
+
+.level-tab.active {
+    background: linear-gradient(135deg, var(--accent) 0%, #69aefb 100%);
+    color: white;
+}
+
+.table-wrap.embedded {
+    border-radius: 18px;
+    box-shadow: none;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;

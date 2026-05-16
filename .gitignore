@@ -27,7 +27,7 @@ out/
 !**/src/test/**/out/
 
 ### Local runtime files ###
-data/
+/data/
 bootRun.out
 bootRun.err
 app.jar
