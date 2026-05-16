@@ -31,21 +31,21 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > ~/.ssh/lightsail_key
           chmod 600 ~/.ssh/lightsail_key
-          ssh-keyscan -H "${{ secrets.LIGHTSAIL_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "15.164.41.1" >> ~/.ssh/known_hosts
 
       - name: Pull latest code on server
         run: |
           ssh -i ~/.ssh/lightsail_key \
-            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}" \
+            "ubuntu@15.164.41.1" \
             "cd ~/Japanese-Studing && git pull origin main"
 
       - name: Upload jar to server
         run: |
           scp -i ~/.ssh/lightsail_key app.jar \
-            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}:~/Japanese-Studing/app.jar"
+            "ubuntu@15.164.41.1:~/Japanese-Studing/app.jar"
 
       - name: Restart Docker container
         run: |
           ssh -i ~/.ssh/lightsail_key \
-            "${{ secrets.LIGHTSAIL_USER }}@${{ secrets.LIGHTSAIL_HOST }}" \
+            "ubuntu@15.164.41.1" \
             "cd ~/Japanese-Studing && docker-compose down && docker-compose up -d --build"
