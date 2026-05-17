@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: japanese-studying
     ports:
-      - "8080:8080"
+      - "80:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/sbb;MODE=MYSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
       SPRING_DATASOURCE_USERNAME: sa
