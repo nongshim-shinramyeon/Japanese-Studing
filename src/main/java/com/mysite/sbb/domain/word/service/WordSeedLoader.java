@@ -29,8 +29,11 @@ public class WordSeedLoader implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) throws IOException {
+        if (wordRepository.count() > 0) {
+            return;
+        }
+
         List<Word> words = loadWords();
-        wordRepository.deleteAllInBatch();
         wordRepository.saveAll(words);
     }
 

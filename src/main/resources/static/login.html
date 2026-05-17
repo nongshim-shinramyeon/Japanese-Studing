@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Japanese King</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span class="brand-badge">JK</span>
+            <span>Japanese King</span>
+        </a>
+        <nav class="nav">
+            <a href="/">Home</a>
+            <a href="/words.html">Words</a>
+            <a href="/grammar-notes.html">Grammar Notes</a>
+            <a href="/community.html">Community</a>
+            <a class="active" href="/login.html">Login</a>
+        </nav>
+    </header>
+
+    <section class="auth-shell">
+        <div class="panel auth-panel">
+            <p class="eyebrow">Account</p>
+            <h2>Log in</h2>
+            <p class="muted">Your word progress is saved separately from other users.</p>
+            <div id="login-message" class="message">Enter your account information.</div>
+            <form id="login-form">
+                <div class="field">
+                    <label for="username">Username</label>
+                    <input id="username" name="username" autocomplete="username" required minlength="3" maxlength="50">
+                </div>
+                <div class="field">
+                    <label for="password">Password</label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required minlength="4" maxlength="100">
+                </div>
+                <div class="button-row">
+                    <button type="submit" class="primary">Log in</button>
+                    <button type="button" id="signup-button" class="secondary">Create account</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>
+<script type="module" src="/js/login.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { fetchCollection } from "./api.js";
+import { createResource, fetchCollection, patchResource } from "./api.js";
 
 const tableBody = document.querySelector("#word-table-body");
 const emptyState = document.querySelector("#word-empty");
@@ -8,6 +8,8 @@ const messageBox = document.querySelector("#word-message");
 const prevButton = document.querySelector("#word-prev-page");
 const nextButton = document.querySelector("#word-next-page");
 const levelButtons = document.querySelectorAll("[data-level]");
+const currentUser = document.querySelector("#current-user");
+const authLink = document.querySelector("#auth-link");
 
 let currentLevel = "N5";
 let currentPage = 0;
@@ -57,7 +59,16 @@ function renderRows(page) {
             <td>${escapeHtml(word.reading)}</td>
             <td>${escapeHtml(word.meaning)}</td>
             <td><span class="pill">${escapeHtml(word.jlptLevel)}</span></td>
+            <td>
+                <select class="status-select" data-word-id="${escapeHtml(word.id)}">
+                    <option value="NEW" ${word.studyStatus === "NEW" ? "selected" : ""}>NEW</option>
+                    <option value="LEARNING" ${word.studyStatus === "LEARNING" ? "selected" : ""}>LEARNING</option>
+                    <option value="REVIEW_NEEDED" ${word.studyStatus === "REVIEW_NEEDED" ? "selected" : ""}>REVIEW_NEEDED</option>
+                    <option value="MASTERED" ${word.studyStatus === "MASTERED" ? "selected" : ""}>MASTERED</option>
+                </select>
+            </td>
         `;
+        row.querySelector("[data-word-id]").addEventListener("change", handleStatusChange);
         tableBody.appendChild(row);
     }
 }
@@ -85,6 +96,37 @@ async function loadWords(page = 0) {
     }
 }
 
+async function handleStatusChange(event) {
+    const select = event.currentTarget;
+    select.disabled = true;
+
+    try {
+        await patchResource(`/api/words/${select.dataset.wordId}/status`, {
+            studyStatus: select.value
+        });
+    } catch (error) {
+        renderMessage(error.message);
+    } finally {
+        select.disabled = false;
+    }
+}
+
+async function ensureLoggedIn() {
+    try {
+        const user = await fetchCollection("/api/auth/me");
+        currentUser.textContent = user.username;
+        authLink.textContent = "Logout";
+        authLink.href = "#";
+        authLink.addEventListener("click", async (event) => {
+            event.preventDefault();
+            await createResource("/api/auth/logout", {});
+            window.location.href = "/login.html";
+        });
+    } catch {
+        window.location.href = "/login.html";
+    }
+}
+
 for (const button of levelButtons) {
     button.addEventListener("click", async () => {
         currentLevel = button.dataset.level;
@@ -106,4 +148,5 @@ nextButton.addEventListener("click", async () => {
 });
 
 renderActiveLevel();
+await ensureLoggedIn();
 loadWords();

@@ -18,6 +18,10 @@ public record WordResponse(
         LocalDateTime updatedAt
 ) {
     public static WordResponse from(Word word) {
+        return from(word, word.getStudyStatus());
+    }
+
+    public static WordResponse from(Word word, StudyStatus studyStatus) {
         return new WordResponse(
                 word.getId(),
                 word.getJapanese(),
@@ -26,7 +30,7 @@ public record WordResponse(
                 word.getPartOfSpeech(),
                 word.getExampleSentence(),
                 word.getJlptLevel(),
-                word.getStudyStatus(),
+                studyStatus,
                 word.getCreatedAt(),
                 word.getUpdatedAt()
         );

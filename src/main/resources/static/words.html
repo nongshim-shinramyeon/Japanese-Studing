@@ -19,6 +19,7 @@
             <a href="/grammar-notes.html">Grammar Notes</a>
             <a href="/community.html">Community</a>
             <a href="/h2-console">H2 Console</a>
+            <a href="/login.html" id="auth-link">Login</a>
         </nav>
     </header>
 
@@ -27,9 +28,12 @@
             <div>
                 <p class="eyebrow">JLPT Word Book</p>
                 <h2>Level vocabulary</h2>
-                <p class="muted">Browse the prepared word lists by JLPT level.</p>
+                <p class="muted">Browse JLPT words and manage your own study status.</p>
             </div>
-            <p class="table-note">Total items: <strong id="word-count">0</strong></p>
+            <div class="stack">
+                <p class="table-note">Signed in as <strong id="current-user">-</strong></p>
+                <p class="table-note">Total items: <strong id="word-count">0</strong></p>
+            </div>
         </div>
 
         <div id="level-tabs" class="level-tabs" aria-label="JLPT level tabs">
@@ -50,6 +54,7 @@
                     <th>Reading</th>
                     <th>Meaning</th>
                     <th>Level</th>
+                    <th>My status</th>
                 </tr>
                 </thead>
                 <tbody id="word-table-body"></tbody>

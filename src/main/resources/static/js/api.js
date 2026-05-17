@@ -11,7 +11,7 @@ async function request(url, options = {}) {
     const payload = await response.json().catch(() => null);
 
     if (!response.ok || payload?.success === false) {
-        const message = payload?.error?.message || "요청 처리 중 오류가 발생했습니다.";
+        const message = payload?.error?.message || "Request failed.";
         throw new Error(message);
     }
 
@@ -32,6 +32,13 @@ export async function createResource(url, body) {
 export async function updateResource(url, body) {
     return request(url, {
         method: "PUT",
+        body: JSON.stringify(body)
+    });
+}
+
+export async function patchResource(url, body) {
+    return request(url, {
+        method: "PATCH",
         body: JSON.stringify(body)
     });
 }

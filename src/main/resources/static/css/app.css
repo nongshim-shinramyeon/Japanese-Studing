@@ -291,6 +291,16 @@ button:hover,
     gap: 18px;
 }
 
+.auth-shell {
+    min-height: 62vh;
+    display: grid;
+    place-items: center;
+}
+
+.auth-panel {
+    width: min(100%, 460px);
+}
+
 .level-tabs {
     display: flex;
     gap: 10px;
@@ -312,6 +322,12 @@ button:hover,
 .table-wrap.embedded {
     border-radius: 18px;
     box-shadow: none;
+}
+
+.status-select {
+    min-width: 165px;
+    padding: 9px 12px;
+    border-radius: 999px;
 }
 
 table {

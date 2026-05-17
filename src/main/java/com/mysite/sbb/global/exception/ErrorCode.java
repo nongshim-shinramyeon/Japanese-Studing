@@ -3,12 +3,16 @@ package com.mysite.sbb.global.exception;
 import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
-    WORD_NOT_FOUND(HttpStatus.NOT_FOUND, "WORD_NOT_FOUND", "단어를 찾을 수 없습니다."),
-    GRAMMAR_NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "GRAMMAR_NOTE_NOT_FOUND", "문법 노트를 찾을 수 없습니다."),
-    COMMUNITY_POST_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY_POST_NOT_FOUND", "게시글을 찾을 수 없습니다."),
-    COMMUNITY_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY_COMMENT_NOT_FOUND", "댓글을 찾을 수 없습니다."),
-    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "입력값 검증에 실패했습니다."),
-    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "서버 내부 오류가 발생했습니다.");
+    WORD_NOT_FOUND(HttpStatus.NOT_FOUND, "WORD_NOT_FOUND", "Word not found."),
+    USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "User not found."),
+    DUPLICATE_USERNAME(HttpStatus.CONFLICT, "DUPLICATE_USERNAME", "Username is already taken."),
+    INVALID_LOGIN(HttpStatus.UNAUTHORIZED, "INVALID_LOGIN", "Invalid username or password."),
+    UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Please log in first."),
+    GRAMMAR_NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "GRAMMAR_NOTE_NOT_FOUND", "Grammar note not found."),
+    COMMUNITY_POST_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY_POST_NOT_FOUND", "Community post not found."),
+    COMMUNITY_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY_COMMENT_NOT_FOUND", "Community comment not found."),
+    VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Validation failed."),
+    INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Internal server error.");
 
     private final HttpStatus status;
     private final String code;
