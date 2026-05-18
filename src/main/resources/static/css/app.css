@@ -324,6 +324,10 @@ button:hover,
     box-shadow: none;
 }
 
+.page-meta {
+    justify-items: end;
+}
+
 .status-select {
     min-width: 165px;
     padding: 9px 12px;
@@ -492,5 +496,9 @@ th {
     th,
     td {
         padding: 14px 16px;
+    }
+
+    .page-meta {
+        justify-items: start;
     }
 }

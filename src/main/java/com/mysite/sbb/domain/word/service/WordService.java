@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,6 +54,10 @@ public class WordService {
     }
 
     public Page<WordResponse> getWords(JlptLevel jlptLevel, StudyStatus studyStatus, Long userId, Pageable pageable) {
+        if (userId != null && studyStatus != null) {
+            return getWordsByUserStatus(jlptLevel, studyStatus, userId, pageable);
+        }
+
         Page<Word> words;
         if (jlptLevel != null && studyStatus != null) {
             words = wordRepository.findByJlptLevelAndStudyStatus(jlptLevel, studyStatus, pageable);
@@ -102,6 +107,25 @@ public class WordService {
         return WordResponse.from(word, userWordStatus.getStudyStatus());
     }
 
+    private Page<WordResponse> getWordsByUserStatus(
+            JlptLevel jlptLevel,
+            StudyStatus studyStatus,
+            Long userId,
+            Pageable pageable
+    ) {
+        List<Word> scopedWords = loadScopedWords(jlptLevel, pageable.getSort());
+        Map<Long, UserWordStatus> statuses = userWordStatusRepository.findByUser_IdAndWordIn(userId, scopedWords)
+                .stream()
+                .collect(Collectors.toMap(status -> status.getWord().getId(), Function.identity()));
+
+        List<WordResponse> filteredResponses = scopedWords.stream()
+                .map(word -> WordResponse.from(word, getUserStatus(statuses, word)))
+                .filter(response -> response.studyStatus() == studyStatus)
+                .toList();
+
+        return paginateResponses(filteredResponses, pageable);
+    }
+
     private Page<WordResponse> toUserWordResponses(Page<Word> words, Long userId) {
         if (userId == null || words.isEmpty()) {
             return words.map(WordResponse::from);
@@ -124,6 +148,24 @@ public class WordService {
             return StudyStatus.NEW;
         }
         return userWordStatus.getStudyStatus();
+    }
+
+    private List<Word> loadScopedWords(JlptLevel jlptLevel, Sort sort) {
+        Sort effectiveSort = sort.isSorted() ? sort : Sort.by(Sort.Direction.ASC, "id");
+        if (jlptLevel != null) {
+            return wordRepository.findAllByJlptLevel(jlptLevel, effectiveSort);
+        }
+        return wordRepository.findAll(effectiveSort);
+    }
+
+    private Page<WordResponse> paginateResponses(List<WordResponse> responses, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        if (start >= responses.size()) {
+            return new PageImpl<>(List.of(), pageable, responses.size());
+        }
+
+        int end = Math.min(start + pageable.getPageSize(), responses.size());
+        return new PageImpl<>(responses.subList(start, end), pageable, responses.size());
     }
 
     private Word findWord(Long id) {
