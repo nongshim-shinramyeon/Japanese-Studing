@@ -23,19 +23,27 @@ public class CommunityPost extends BaseTimeEntity {
     @Column(nullable = false, length = 3000)
     private String content;
 
+    @Column(nullable = false, length = 120, updatable = false)
+    private String ownerKey;
+
     protected CommunityPost() {
     }
 
-    public CommunityPost(String authorName, String title, String content) {
+    public CommunityPost(String authorName, String title, String content, String ownerKey) {
         this.authorName = authorName;
         this.title = title;
         this.content = content;
+        this.ownerKey = ownerKey;
     }
 
     public void update(String authorName, String title, String content) {
         this.authorName = authorName;
         this.title = title;
         this.content = content;
+    }
+
+    public boolean isOwnedBy(String ownerKey) {
+        return this.ownerKey.equals(ownerKey);
     }
 
     public Long getId() {
@@ -52,5 +60,9 @@ public class CommunityPost extends BaseTimeEntity {
 
     public String getContent() {
         return content;
+    }
+
+    public String getOwnerKey() {
+        return ownerKey;
     }
 }

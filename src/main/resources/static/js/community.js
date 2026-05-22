@@ -1,4 +1,7 @@
-import { createResource, deleteResource, fetchCollection, updateResource } from "./api.js";
+import { createResource, createResourceWithHeaders, deleteResource, fetchCollection, updateResource } from "./api.js";
+
+const OWNER_KEY_HEADER = "X-Community-Owner-Key";
+const POST_OWNER_KEYS_STORAGE_KEY = "communityPostOwnerKeys";
 
 const postForm = document.querySelector("#community-post-form");
 const postMessage = document.querySelector("#community-post-message");
@@ -34,6 +37,51 @@ let postPage = 0;
 let postTotalPages = 1;
 let commentPage = 0;
 let commentTotalPages = 1;
+
+function loadPostOwnerKeys() {
+    try {
+        return JSON.parse(localStorage.getItem(POST_OWNER_KEYS_STORAGE_KEY)) || {};
+    } catch {
+        return {};
+    }
+}
+
+function savePostOwnerKeys(ownerKeys) {
+    localStorage.setItem(POST_OWNER_KEYS_STORAGE_KEY, JSON.stringify(ownerKeys));
+}
+
+function createOwnerKey() {
+    if (crypto.randomUUID) {
+        return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function rememberPostOwnerKey(postId, ownerKey) {
+    const ownerKeys = loadPostOwnerKeys();
+    ownerKeys[String(postId)] = ownerKey;
+    savePostOwnerKeys(ownerKeys);
+}
+
+function getPostOwnerKey(postId) {
+    const ownerKeys = loadPostOwnerKeys();
+    return ownerKeys[String(postId)] || null;
+}
+
+function forgetPostOwnerKey(postId) {
+    const ownerKeys = loadPostOwnerKeys();
+    delete ownerKeys[String(postId)];
+    savePostOwnerKeys(ownerKeys);
+}
+
+function isMyPost(postId) {
+    return Boolean(getPostOwnerKey(postId));
+}
+
+function postOwnerHeaders(postId) {
+    const ownerKey = getPostOwnerKey(postId);
+    return ownerKey ? { [OWNER_KEY_HEADER]: ownerKey } : {};
+}
 
 function setMessage(target, text, type = "") {
     target.textContent = text;
@@ -79,6 +127,8 @@ function renderSelectedPost(post) {
         selectedContent.textContent = "Once you pick a post, its content and comments will appear here.";
         editPostButton.disabled = true;
         deletePostButton.disabled = true;
+        editPostButton.hidden = true;
+        deletePostButton.hidden = true;
         commentSubmitButton.disabled = true;
         prevCommentsButton.disabled = true;
         nextCommentsButton.disabled = true;
@@ -95,8 +145,13 @@ function renderSelectedPost(post) {
         <span>Updated: ${formatDate(post.updatedAt)}</span>
     `;
     selectedContent.textContent = post.content;
-    editPostButton.disabled = false;
-    deletePostButton.disabled = false;
+    const ownedByCurrentBrowser = isMyPost(post.id);
+    editPostButton.hidden = !ownedByCurrentBrowser;
+    deletePostButton.hidden = !ownedByCurrentBrowser;
+    editPostButton.disabled = !ownedByCurrentBrowser;
+    deletePostButton.disabled = !ownedByCurrentBrowser;
+    editPostButton.title = ownedByCurrentBrowser ? "" : "Only the original writer can edit this post.";
+    deletePostButton.title = ownedByCurrentBrowser ? "" : "Only the original writer can delete this post.";
     commentSubmitButton.disabled = false;
 }
 
@@ -277,10 +332,12 @@ postForm.addEventListener("submit", async (event) => {
     try {
         let result;
         if (editingPostId) {
-            result = await updateResource(`/api/community/posts/${editingPostId}`, body);
+            result = await updateResource(`/api/community/posts/${editingPostId}`, body, postOwnerHeaders(editingPostId));
             setMessage(postMessage, "Post updated.", "success");
         } else {
-            result = await createResource("/api/community/posts", body);
+            const ownerKey = createOwnerKey();
+            result = await createResourceWithHeaders("/api/community/posts", body, { [OWNER_KEY_HEADER]: ownerKey });
+            rememberPostOwnerKey(result.id, ownerKey);
             setMessage(postMessage, "Post created.", "success");
         }
         resetPostForm();
@@ -376,8 +433,9 @@ deletePostButton.addEventListener("click", async () => {
         return;
     }
     try {
-        await deleteResource(`/api/community/posts/${selectedPostId}`);
+        await deleteResource(`/api/community/posts/${selectedPostId}`, postOwnerHeaders(selectedPostId));
         setMessage(postMessage, "Post deleted.", "success");
+        forgetPostOwnerKey(selectedPostId);
         selectedPostId = null;
         resetPostForm();
         resetCommentForm();

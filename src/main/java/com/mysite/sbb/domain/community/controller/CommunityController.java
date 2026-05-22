@@ -19,12 +19,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/community")
 public class CommunityController {
+
+    private static final String OWNER_KEY_HEADER = "X-Community-Owner-Key";
 
     private final CommunityService communityService;
 
@@ -33,8 +36,11 @@ public class CommunityController {
     }
 
     @PostMapping("/posts")
-    public ResponseEntity<ApiResponse<CommunityPostResponse>> createPost(@Valid @RequestBody CommunityPostRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(communityService.createPost(request)));
+    public ResponseEntity<ApiResponse<CommunityPostResponse>> createPost(
+            @Valid @RequestBody CommunityPostRequest request,
+            @RequestHeader(value = OWNER_KEY_HEADER, required = false) String ownerKey
+    ) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(communityService.createPost(request, ownerKey)));
     }
 
     @GetMapping("/posts")
@@ -52,14 +58,18 @@ public class CommunityController {
     @PutMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<CommunityPostResponse>> updatePost(
             @PathVariable Long postId,
-            @Valid @RequestBody CommunityPostRequest request
+            @Valid @RequestBody CommunityPostRequest request,
+            @RequestHeader(value = OWNER_KEY_HEADER, required = false) String ownerKey
     ) {
-        return ResponseEntity.ok(ApiResponse.success(communityService.updatePost(postId, request)));
+        return ResponseEntity.ok(ApiResponse.success(communityService.updatePost(postId, request, ownerKey)));
     }
 
     @DeleteMapping("/posts/{postId}")
-    public ResponseEntity<ApiResponse<Void>> deletePost(@PathVariable Long postId) {
-        communityService.deletePost(postId);
+    public ResponseEntity<ApiResponse<Void>> deletePost(
+            @PathVariable Long postId,
+            @RequestHeader(value = OWNER_KEY_HEADER, required = false) String ownerKey
+    ) {
+        communityService.deletePost(postId, ownerKey);
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 

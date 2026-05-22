@@ -10,6 +10,7 @@ public enum ErrorCode {
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Please log in first."),
     GRAMMAR_NOTE_NOT_FOUND(HttpStatus.NOT_FOUND, "GRAMMAR_NOTE_NOT_FOUND", "Grammar note not found."),
     COMMUNITY_POST_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY_POST_NOT_FOUND", "Community post not found."),
+    COMMUNITY_POST_FORBIDDEN(HttpStatus.FORBIDDEN, "COMMUNITY_POST_FORBIDDEN", "Only the original writer can edit or delete this post."),
     COMMUNITY_COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMUNITY_COMMENT_NOT_FOUND", "Community comment not found."),
     VALIDATION_FAILED(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Validation failed."),
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_SERVER_ERROR", "Internal server error.");

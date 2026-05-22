@@ -11,10 +11,12 @@ import com.mysite.sbb.domain.community.repository.CommunityPostRepository;
 import com.mysite.sbb.global.exception.BusinessException;
 import com.mysite.sbb.global.exception.ErrorCode;
 import java.util.List;
+import java.util.UUID;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,8 +32,13 @@ public class CommunityService {
     }
 
     @Transactional
-    public CommunityPostResponse createPost(CommunityPostRequest request) {
-        CommunityPost post = new CommunityPost(request.authorName(), request.title(), request.content());
+    public CommunityPostResponse createPost(CommunityPostRequest request, String ownerKey) {
+        CommunityPost post = new CommunityPost(
+                request.authorName(),
+                request.title(),
+                request.content(),
+                normalizeOwnerKey(ownerKey)
+        );
         return CommunityPostResponse.from(communityPostRepository.save(post));
     }
 
@@ -44,15 +51,17 @@ public class CommunityService {
     }
 
     @Transactional
-    public CommunityPostResponse updatePost(Long postId, CommunityPostRequest request) {
+    public CommunityPostResponse updatePost(Long postId, CommunityPostRequest request, String ownerKey) {
         CommunityPost post = findPost(postId);
+        validatePostOwner(post, ownerKey);
         post.update(request.authorName(), request.title(), request.content());
         return CommunityPostResponse.from(post);
     }
 
     @Transactional
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, String ownerKey) {
         CommunityPost post = findPost(postId);
+        validatePostOwner(post, ownerKey);
         communityCommentRepository.deleteByPost(post);
         communityPostRepository.delete(post);
     }
@@ -97,6 +106,19 @@ public class CommunityService {
     private CommunityComment findComment(Long commentId) {
         return communityCommentRepository.findById(commentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.COMMUNITY_COMMENT_NOT_FOUND));
+    }
+
+    private String normalizeOwnerKey(String ownerKey) {
+        if (StringUtils.hasText(ownerKey)) {
+            return ownerKey.trim();
+        }
+        return UUID.randomUUID().toString();
+    }
+
+    private void validatePostOwner(CommunityPost post, String ownerKey) {
+        if (!StringUtils.hasText(ownerKey) || !post.isOwnedBy(ownerKey.trim())) {
+            throw new BusinessException(ErrorCode.COMMUNITY_POST_FORBIDDEN);
+        }
     }
 
     private void deleteCommentTree(CommunityComment comment) {

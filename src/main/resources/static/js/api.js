@@ -3,9 +3,14 @@ const DEFAULT_HEADERS = {
 };
 
 async function request(url, options = {}) {
+    const headers = {
+        ...DEFAULT_HEADERS,
+        ...(options.headers || {})
+    };
+
     const response = await fetch(url, {
-        headers: DEFAULT_HEADERS,
-        ...options
+        ...options,
+        headers
     });
 
     const payload = await response.json().catch(() => null);
@@ -29,20 +34,30 @@ export async function createResource(url, body) {
     });
 }
 
-export async function updateResource(url, body) {
+export async function createResourceWithHeaders(url, body, headers = {}) {
     return request(url, {
-        method: "PUT",
+        method: "POST",
+        headers,
         body: JSON.stringify(body)
     });
 }
 
-export async function patchResource(url, body) {
+export async function patchResource(url, body, headers = {}) {
     return request(url, {
         method: "PATCH",
+        headers,
         body: JSON.stringify(body)
     });
 }
 
-export async function deleteResource(url) {
-    return request(url, { method: "DELETE" });
+export async function updateResource(url, body, headers = {}) {
+    return request(url, {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(body)
+    });
+}
+
+export async function deleteResource(url, headers = {}) {
+    return request(url, { method: "DELETE", headers });
 }
