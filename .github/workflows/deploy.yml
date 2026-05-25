@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+permissions:
+  contents: read
+  checks: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -55,6 +59,13 @@ jobs:
           scp -i ~/.ssh/lightsail_key app.jar \
             "ubuntu@15.164.41.1:~/Japanese-Studing/app.jar"
 
+      - name: Open instance OS firewall for web traffic
+        run: |
+          ssh -i ~/.ssh/lightsail_key \
+            "ubuntu@15.164.41.1" \
+            "sudo ufw allow 80/tcp || true && \
+             sudo ufw allow 443/tcp || true"
+
       - name: Restart Docker container
         run: |
           ssh -i ~/.ssh/lightsail_key \
@@ -64,3 +75,87 @@ jobs:
              docker-compose down --remove-orphans || true && \
              docker-compose up -d --build && \
              docker-compose logs --tail 120 jlptcloud"
+
+      - name: Verify service on server
+        run: |
+          ssh -i ~/.ssh/lightsail_key \
+            "ubuntu@15.164.41.1" \
+            "for attempt in \$(seq 1 30); do \
+               if curl -fsS --max-time 3 http://127.0.0.1/ >/dev/null; then \
+                 echo 'JLPTCloud responded locally on port 80'; \
+                 exit 0; \
+               fi; \
+               sleep 2; \
+             done; \
+             cd ~/Japanese-Studing && \
+             docker-compose ps && \
+             docker-compose logs --tail 200 jlptcloud && \
+             exit 1"
+
+      - name: Capture deployment diagnostics
+        if: always()
+        run: |
+          set +e
+          ssh -i ~/.ssh/lightsail_key \
+            "ubuntu@15.164.41.1" \
+            "cd ~/Japanese-Studing && \
+             echo '## docker-compose ps' && \
+             docker-compose ps && \
+             echo && echo '## docker ps' && \
+             docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' && \
+             echo && echo '## listening ports' && \
+             (sudo ss -ltnp | grep -E ':(80|443|8080|5432)\\b' || true) && \
+             echo && echo '## local HTTP checks' && \
+             curl -sS --max-time 5 -o /tmp/jlptcloud-root.out -w 'GET / -> %{http_code}\n' http://127.0.0.1/ || true && \
+             head -c 500 /tmp/jlptcloud-root.out 2>/dev/null || true && \
+             echo && \
+             curl -sS --max-time 5 -o /tmp/jlptcloud-words.out -w 'GET /api/words -> %{http_code}\n' http://127.0.0.1/api/words || true && \
+             head -c 500 /tmp/jlptcloud-words.out 2>/dev/null || true && \
+             echo && echo '## ufw status' && \
+             sudo ufw status verbose || true && \
+             echo && echo '## jlptcloud logs' && \
+             docker-compose logs --tail 220 jlptcloud && \
+             echo && echo '## postgres logs' && \
+             docker-compose logs --tail 120 postgres" \
+            > deployment-diagnostics.txt 2>&1
+          sed -i -E 's/((POSTGRES_PASSWORD|JLPTCLOUD_DB_PASSWORD|SPRING_DATASOURCE_PASSWORD)=)[^[:space:]]+/\1***REDACTED***/g' deployment-diagnostics.txt
+
+      - name: Publish deployment diagnostics
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          CHECK_SHA: ${{ github.sha }}
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import pathlib
+          import urllib.request
+
+          diagnostics = pathlib.Path("deployment-diagnostics.txt")
+          text = diagnostics.read_text(encoding="utf-8", errors="replace") if diagnostics.exists() else "No diagnostics were captured."
+          summary = text[-60000:]
+          payload = {
+              "name": "JLPTCloud deployment diagnostics",
+              "head_sha": os.environ["CHECK_SHA"],
+              "status": "completed",
+              "conclusion": "neutral",
+              "output": {
+                  "title": "Latest Lightsail deployment diagnostics",
+                  "summary": f"```\n{summary}\n```",
+              },
+          }
+          request = urllib.request.Request(
+              f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/check-runs",
+              data=json.dumps(payload).encode("utf-8"),
+              headers={
+                  "Authorization": f"Bearer {os.environ['GITHUB_TOKEN']}",
+                  "Accept": "application/vnd.github+json",
+                  "X-GitHub-Api-Version": "2022-11-28",
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+          with urllib.request.urlopen(request) as response:
+              print(response.read().decode("utf-8"))
+          PY
