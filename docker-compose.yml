@@ -1,20 +1,41 @@
 services:
-  japanese-studying:
+  jlptcloud:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: japanese-studying
+    container_name: jlptcloud
     ports:
       - "80:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:h2:file:/app/data/sbb;MODE=MYSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-      SPRING_DATASOURCE_USERNAME: sa
-      SPRING_DATASOURCE_PASSWORD: ""
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      SPRING_H2_CONSOLE_ENABLED: "true"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jlptcloud
+      SPRING_DATASOURCE_USERNAME: jlptcloud
+      SPRING_DATASOURCE_PASSWORD: ${JLPTCLOUD_DB_PASSWORD:-change-me}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: validate
+      SPRING_H2_CONSOLE_ENABLED: "false"
+      JLPTCLOUD_LEGACY_H2_MIGRATION_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
-      - japanese-studying-data:/app/data
+      - japanese-studying-data:/legacy-h2-data:ro
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: jlptcloud-postgres
+    environment:
+      POSTGRES_DB: jlptcloud
+      POSTGRES_USER: jlptcloud
+      POSTGRES_PASSWORD: ${JLPTCLOUD_DB_PASSWORD:-change-me}
+    volumes:
+      - jlptcloud-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U jlptcloud -d jlptcloud"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     restart: unless-stopped
 
 volumes:
   japanese-studying-data:
+  jlptcloud-postgres-data:

@@ -3,22 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Words | Japanese King</title>
+    <title>Words | JLPTCloud</title>
     <link rel="stylesheet" href="/css/app.css">
 </head>
 <body>
 <div class="shell">
     <header class="topbar">
         <a class="brand" href="/">
-            <span class="brand-badge">JK</span>
-            <span>Japanese King</span>
+            <span class="brand-badge">JC</span>
+            <span>JLPTCloud</span>
         </a>
         <nav class="nav">
             <a href="/">Home</a>
             <a class="active" href="/words.html">Words</a>
             <a href="/grammar-notes.html">Grammar Notes</a>
             <a href="/community.html">Community</a>
-            <a href="/h2-console">H2 Console</a>
             <a href="/login.html" id="auth-link">Login</a>
         </nav>
     </header>
@@ -53,6 +52,7 @@
                 <option value="REVIEW_NEEDED">REVIEW_NEEDED</option>
                 <option value="MASTERED">MASTERED</option>
             </select>
+            <input name="keyword" aria-label="Word search" placeholder="Search word, reading, or meaning">
             <select name="pageSize" aria-label="Page size">
                 <option value="10">10 per page</option>
                 <option value="25" selected>25 per page</option>
@@ -64,6 +64,25 @@
 
         <div id="word-message" class="message" hidden></div>
 
+        <section class="stat-grid progress-grid" aria-label="Study progress dashboard">
+            <article class="stat">
+                <span class="eyebrow">Completion</span>
+                <strong id="progress-completion">0%</strong>
+                <span class="muted">Mastered words across the selected account.</span>
+            </article>
+            <article class="stat">
+                <span class="eyebrow">Due Reviews</span>
+                <strong id="progress-due">0</strong>
+                <span class="muted">Words scheduled for review now.</span>
+            </article>
+            <article class="stat">
+                <span class="eyebrow">Weak Points</span>
+                <strong id="progress-review-needed">0</strong>
+                <span class="muted">Words marked as review needed.</span>
+            </article>
+        </section>
+        <div id="level-progress" class="level-progress"></div>
+
         <div class="table-wrap embedded">
             <table>
                 <thead>
@@ -73,6 +92,7 @@
                     <th>Meaning</th>
                     <th>Level</th>
                     <th>My status</th>
+                    <th>Review</th>
                 </tr>
                 </thead>
                 <tbody id="word-table-body"></tbody>

@@ -1,7 +1,4 @@
-import { createResource, createResourceWithHeaders, deleteResource, fetchCollection, updateResource } from "./api.js";
-
-const OWNER_KEY_HEADER = "X-Community-Owner-Key";
-const POST_OWNER_KEYS_STORAGE_KEY = "communityPostOwnerKeys";
+import { createResource, deleteResource, fetchCollection, updateResource } from "./api.js";
 
 const postForm = document.querySelector("#community-post-form");
 const postMessage = document.querySelector("#community-post-message");
@@ -29,6 +26,8 @@ const commentSubmitButton = document.querySelector("#community-comment-submit");
 const cancelCommentEditButton = document.querySelector("#cancel-comment-edit");
 const cancelReplyTargetButton = document.querySelector("#cancel-reply-target");
 const replyTarget = document.querySelector("#community-reply-target");
+const currentUser = document.querySelector("#current-user");
+const authLink = document.querySelector("#auth-link");
 
 let selectedPostId = null;
 let editingPostId = null;
@@ -37,50 +36,15 @@ let postPage = 0;
 let postTotalPages = 1;
 let commentPage = 0;
 let commentTotalPages = 1;
+let signedIn = false;
 
-function loadPostOwnerKeys() {
-    try {
-        return JSON.parse(localStorage.getItem(POST_OWNER_KEYS_STORAGE_KEY)) || {};
-    } catch {
-        return {};
-    }
-}
-
-function savePostOwnerKeys(ownerKeys) {
-    localStorage.setItem(POST_OWNER_KEYS_STORAGE_KEY, JSON.stringify(ownerKeys));
-}
-
-function createOwnerKey() {
-    if (crypto.randomUUID) {
-        return crypto.randomUUID();
-    }
-    return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
-function rememberPostOwnerKey(postId, ownerKey) {
-    const ownerKeys = loadPostOwnerKeys();
-    ownerKeys[String(postId)] = ownerKey;
-    savePostOwnerKeys(ownerKeys);
-}
-
-function getPostOwnerKey(postId) {
-    const ownerKeys = loadPostOwnerKeys();
-    return ownerKeys[String(postId)] || null;
-}
-
-function forgetPostOwnerKey(postId) {
-    const ownerKeys = loadPostOwnerKeys();
-    delete ownerKeys[String(postId)];
-    savePostOwnerKeys(ownerKeys);
-}
-
-function isMyPost(postId) {
-    return Boolean(getPostOwnerKey(postId));
-}
-
-function postOwnerHeaders(postId) {
-    const ownerKey = getPostOwnerKey(postId);
-    return ownerKey ? { [OWNER_KEY_HEADER]: ownerKey } : {};
+function escapeHtml(value) {
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 function setMessage(target, text, type = "") {
@@ -89,11 +53,11 @@ function setMessage(target, text, type = "") {
 }
 
 function resetPostMessage() {
-    setMessage(postMessage, "Post results will appear here.");
+    setMessage(postMessage, signedIn ? "Post results will appear here." : "Log in to write or edit posts.", signedIn ? "" : "error");
 }
 
 function resetCommentMessage() {
-    setMessage(commentMessage, "Comment results will appear here.");
+    setMessage(commentMessage, signedIn ? "Comment results will appear here." : "Log in to comment or reply.", signedIn ? "" : "error");
 }
 
 function formatDate(dateTime) {
@@ -101,6 +65,12 @@ function formatDate(dateTime) {
         return "";
     }
     return new Date(dateTime).toLocaleString();
+}
+
+function setPostFormEnabled(enabled) {
+    postForm.querySelectorAll("input, textarea, button").forEach((control) => {
+        control.disabled = !enabled;
+    });
 }
 
 function resetPostForm() {
@@ -140,19 +110,16 @@ function renderSelectedPost(post) {
 
     selectedTitle.textContent = post.title;
     selectedMeta.innerHTML = `
-        <span>Author: ${post.authorName}</span>
-        <span>Created: ${formatDate(post.createdAt)}</span>
-        <span>Updated: ${formatDate(post.updatedAt)}</span>
+        <span>Author: ${escapeHtml(post.authorName)}</span>
+        <span>Created: ${escapeHtml(formatDate(post.createdAt))}</span>
+        <span>Updated: ${escapeHtml(formatDate(post.updatedAt))}</span>
     `;
     selectedContent.textContent = post.content;
-    const ownedByCurrentBrowser = isMyPost(post.id);
-    editPostButton.hidden = !ownedByCurrentBrowser;
-    deletePostButton.hidden = !ownedByCurrentBrowser;
-    editPostButton.disabled = !ownedByCurrentBrowser;
-    deletePostButton.disabled = !ownedByCurrentBrowser;
-    editPostButton.title = ownedByCurrentBrowser ? "" : "Only the original writer can edit this post.";
-    deletePostButton.title = ownedByCurrentBrowser ? "" : "Only the original writer can delete this post.";
-    commentSubmitButton.disabled = false;
+    editPostButton.hidden = !post.ownedByCurrentUser;
+    deletePostButton.hidden = !post.ownedByCurrentUser;
+    editPostButton.disabled = !post.ownedByCurrentUser;
+    deletePostButton.disabled = !post.ownedByCurrentUser;
+    commentSubmitButton.disabled = !signedIn;
 }
 
 function startPostEdit(post) {
@@ -204,12 +171,13 @@ async function loadPosts(page = 0, preferredPostId = selectedPostId) {
         item.className = `list-item${post.id === preferredPostId ? " active" : ""}`;
         item.innerHTML = `
             <div class="stack">
-                <strong>${post.title}</strong>
+                <strong>${escapeHtml(post.title)}</strong>
                 <div class="meta">
-                    <span>${post.authorName}</span>
-                    <span>${formatDate(post.createdAt)}</span>
+                    <span>${escapeHtml(post.authorName)}</span>
+                    <span>${escapeHtml(formatDate(post.createdAt))}</span>
+                    ${post.ownedByCurrentUser ? "<span>Mine</span>" : ""}
                 </div>
-                <span class="muted">${post.content.slice(0, 120)}</span>
+                <span class="muted">${escapeHtml(post.content.slice(0, 120))}</span>
             </div>
         `;
         item.addEventListener("click", async () => {
@@ -267,15 +235,16 @@ function renderComments(pageData) {
             card.innerHTML = `
                 <div class="stack">
                     <div class="meta">
-                        <span>${comment.authorName}</span>
-                        <span>${formatDate(comment.createdAt)}</span>
-                        <span>Updated: ${formatDate(comment.updatedAt)}</span>
+                        <span>${escapeHtml(comment.authorName)}</span>
+                        <span>${escapeHtml(formatDate(comment.createdAt))}</span>
+                        <span>Updated: ${escapeHtml(formatDate(comment.updatedAt))}</span>
+                        ${comment.ownedByCurrentUser ? "<span>Mine</span>" : ""}
                     </div>
-                    <div>${comment.content}</div>
+                    <div>${escapeHtml(comment.content)}</div>
                     <div class="button-row">
-                        <button type="button" class="secondary" data-reply="${comment.id}">Reply</button>
-                        <button type="button" class="secondary" data-edit="${comment.id}">Edit</button>
-                        <button type="button" class="danger" data-delete="${comment.id}">Delete</button>
+                        <button type="button" class="secondary" data-reply="${comment.id}" ${signedIn ? "" : "disabled"}>Reply</button>
+                        <button type="button" class="secondary" data-edit="${comment.id}" ${comment.ownedByCurrentUser ? "" : "hidden disabled"}>Edit</button>
+                        <button type="button" class="danger" data-delete="${comment.id}" ${comment.ownedByCurrentUser ? "" : "hidden disabled"}>Delete</button>
                     </div>
                 </div>
             `;
@@ -330,16 +299,10 @@ postForm.addEventListener("submit", async (event) => {
     };
 
     try {
-        let result;
-        if (editingPostId) {
-            result = await updateResource(`/api/community/posts/${editingPostId}`, body, postOwnerHeaders(editingPostId));
-            setMessage(postMessage, "Post updated.", "success");
-        } else {
-            const ownerKey = createOwnerKey();
-            result = await createResourceWithHeaders("/api/community/posts", body, { [OWNER_KEY_HEADER]: ownerKey });
-            rememberPostOwnerKey(result.id, ownerKey);
-            setMessage(postMessage, "Post created.", "success");
-        }
+        const result = editingPostId
+                ? await updateResource(`/api/community/posts/${editingPostId}`, body)
+                : await createResource("/api/community/posts", body);
+        setMessage(postMessage, editingPostId ? "Post updated." : "Post created.", "success");
         resetPostForm();
         selectedPostId = result.id;
         await loadPosts(0, result.id);
@@ -433,9 +396,8 @@ deletePostButton.addEventListener("click", async () => {
         return;
     }
     try {
-        await deleteResource(`/api/community/posts/${selectedPostId}`, postOwnerHeaders(selectedPostId));
+        await deleteResource(`/api/community/posts/${selectedPostId}`);
         setMessage(postMessage, "Post deleted.", "success");
-        forgetPostOwnerKey(selectedPostId);
         selectedPostId = null;
         resetPostForm();
         resetCommentForm();
@@ -445,8 +407,30 @@ deletePostButton.addEventListener("click", async () => {
     }
 });
 
-resetPostMessage();
-resetCommentMessage();
+async function ensureSession() {
+    try {
+        const user = await fetchCollection("/api/auth/me");
+        signedIn = true;
+        currentUser.textContent = user.username;
+        authLink.textContent = "Logout";
+        authLink.href = "#";
+        authLink.addEventListener("click", async (event) => {
+            event.preventDefault();
+            await createResource("/api/auth/logout", {});
+            window.location.href = "/login.html";
+        });
+    } catch {
+        signedIn = false;
+        currentUser.textContent = "guest";
+        authLink.textContent = "Login";
+        authLink.href = "/login.html";
+        setPostFormEnabled(false);
+    }
+    resetPostMessage();
+    resetCommentMessage();
+}
+
+await ensureSession();
 loadPosts().catch((error) => {
     setMessage(postMessage, error.message, "error");
 });

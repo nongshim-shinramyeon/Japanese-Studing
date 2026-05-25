@@ -23,14 +23,14 @@ function renderMessage(text, type = "") {
 }
 
 function clearMessage() {
-    messageBox.textContent = "문법 노트를 등록하거나 수정하면 여기에 결과가 표시됩니다.";
+    messageBox.textContent = "문법 ?�트�??�록?�거???�정?�면 ?�기??결과가 ?�시?�니??";
     messageBox.className = "message";
 }
 
 function resetForm() {
     form.reset();
     editingId = null;
-    form.querySelector("button[type='submit']").textContent = "문법 노트 저장";
+    form.querySelector("button[type='submit']").textContent = "문법 ?�트 ?�??;
     cancelEditButton.hidden = true;
 }
 
@@ -67,8 +67,8 @@ function renderRows(page) {
             <td>${note.exampleSentence}</td>
             <td>
                 <div class="button-row">
-                    <button type="button" class="secondary" data-edit="${note.id}">수정</button>
-                    <button type="button" class="danger" data-delete="${note.id}">삭제</button>
+                    <button type="button" class="secondary" data-edit="${note.id}">?�정</button>
+                    <button type="button" class="danger" data-delete="${note.id}">??��</button>
                 </div>
             </td>
         `;
@@ -87,9 +87,9 @@ function startEdit(note) {
     form.exampleSentence.value = note.exampleSentence;
     form.jlptLevel.value = note.jlptLevel;
     form.studyStatus.value = note.studyStatus;
-    form.querySelector("button[type='submit']").textContent = "문법 노트 수정";
+    form.querySelector("button[type='submit']").textContent = "문법 ?�트 ?�정";
     cancelEditButton.hidden = false;
-    renderMessage("수정 모드로 전환했습니다.", "success");
+    renderMessage("?�정 모드�??�환?�습?�다.", "success");
 }
 
 async function loadNotes(page = 0) {
@@ -118,7 +118,7 @@ async function loadNotes(page = 0) {
 async function handleDelete(id) {
     try {
         await deleteResource(`/api/grammar-notes/${id}`);
-        renderMessage("문법 노트를 삭제했습니다.", "success");
+        renderMessage("문법 ?�트�???��?�습?�다.", "success");
         if (editingId === id) {
             resetForm();
         }
@@ -143,10 +143,10 @@ form.addEventListener("submit", async (event) => {
     try {
         if (editingId) {
             await updateResource(`/api/grammar-notes/${editingId}`, body);
-            renderMessage("문법 노트를 수정했습니다.", "success");
+            renderMessage("문법 ?�트�??�정?�습?�다.", "success");
         } else {
             await createResource("/api/grammar-notes", body);
-            renderMessage("문법 노트를 등록했습니다.", "success");
+            renderMessage("문법 ?�트�??�록?�습?�다.", "success");
         }
         resetForm();
         await loadNotes(0);

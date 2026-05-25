@@ -39,6 +39,17 @@ jobs:
             "ubuntu@15.164.41.1" \
             "cd ~/Japanese-Studing && git pull origin main"
 
+      - name: Configure production environment
+        run: |
+          ssh -i ~/.ssh/lightsail_key \
+            "ubuntu@15.164.41.1" \
+            "cd ~/Japanese-Studing && \
+             if [ -n '${{ secrets.JLPTCLOUD_DB_PASSWORD }}' ]; then \
+               printf 'JLPTCLOUD_DB_PASSWORD=%s\n' '${{ secrets.JLPTCLOUD_DB_PASSWORD }}' > .env; \
+             elif [ ! -f .env ]; then \
+               printf 'JLPTCLOUD_DB_PASSWORD=%s\n' \"\$(openssl rand -base64 24)\" > .env; \
+             fi"
+
       - name: Upload jar to server
         run: |
           scp -i ~/.ssh/lightsail_key app.jar \
@@ -48,4 +59,8 @@ jobs:
         run: |
           ssh -i ~/.ssh/lightsail_key \
             "ubuntu@15.164.41.1" \
-            "cd ~/Japanese-Studing && docker-compose down && docker-compose up -d --build"
+            "cd ~/Japanese-Studing && \
+             docker rm -f japanese-studying || true && \
+             docker-compose down --remove-orphans || true && \
+             docker-compose up -d --build && \
+             docker-compose logs --tail 120 jlptcloud"

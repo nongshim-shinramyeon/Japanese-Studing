@@ -1,0 +1,62 @@
+package com.jlptcloud.domain.user.service;
+
+import com.jlptcloud.domain.user.dto.AuthRequest;
+import com.jlptcloud.domain.user.dto.UserResponse;
+import com.jlptcloud.domain.user.entity.AppUser;
+import com.jlptcloud.domain.user.repository.AppUserRepository;
+import com.jlptcloud.global.exception.BusinessException;
+import com.jlptcloud.global.exception.ErrorCode;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@Transactional(readOnly = true)
+public class AuthService {
+
+    private final AppUserRepository appUserRepository;
+    private final PasswordHashService passwordHashService;
+
+    public AuthService(AppUserRepository appUserRepository, PasswordHashService passwordHashService) {
+        this.appUserRepository = appUserRepository;
+        this.passwordHashService = passwordHashService;
+    }
+
+    @Transactional
+    public UserResponse signup(AuthRequest request) {
+        String username = normalizeUsername(request.username());
+        if (appUserRepository.existsByUsername(username)) {
+            throw new BusinessException(ErrorCode.DUPLICATE_USERNAME);
+        }
+
+        AppUser user = new AppUser(username, passwordHashService.hash(request.password()));
+        return UserResponse.from(appUserRepository.save(user));
+    }
+
+    @Transactional
+    public UserResponse login(AuthRequest request) {
+        String username = normalizeUsername(request.username());
+        AppUser user = appUserRepository.findByUsername(username)
+                .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_LOGIN));
+
+        if (!passwordHashService.matches(request.password(), user.getPasswordHash())) {
+            throw new BusinessException(ErrorCode.INVALID_LOGIN);
+        }
+        if (passwordHashService.shouldRehash(user.getPasswordHash())) {
+            user.updatePasswordHash(passwordHashService.hash(request.password()));
+        }
+
+        return UserResponse.from(user);
+    }
+
+    public AppUser getUser(Long userId) {
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.UNAUTHORIZED);
+        }
+        return appUserRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private String normalizeUsername(String username) {
+        return username.trim().toLowerCase();
+    }
+}

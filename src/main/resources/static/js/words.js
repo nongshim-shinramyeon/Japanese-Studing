@@ -6,6 +6,10 @@ const countTarget = document.querySelector("#word-count");
 const pageTarget = document.querySelector("#word-page");
 const rangeTarget = document.querySelector("#word-range");
 const messageBox = document.querySelector("#word-message");
+const progressCompletion = document.querySelector("#progress-completion");
+const progressDue = document.querySelector("#progress-due");
+const progressReviewNeeded = document.querySelector("#progress-review-needed");
+const levelProgress = document.querySelector("#level-progress");
 const prevButton = document.querySelector("#word-prev-page");
 const nextButton = document.querySelector("#word-next-page");
 const levelButtons = document.querySelectorAll("[data-level]");
@@ -16,6 +20,7 @@ const resetFiltersButton = document.querySelector("#word-reset-filters");
 
 let currentLevel = "N5";
 let currentStatus = "";
+let currentKeyword = "";
 let currentPage = 0;
 let totalPages = 1;
 let currentPageSize = 25;
@@ -38,6 +43,40 @@ function renderMessage(text, type = "error") {
 function clearMessage() {
     messageBox.hidden = true;
     messageBox.textContent = "";
+}
+
+function formatDate(dateTime) {
+    if (!dateTime) {
+        return "No review scheduled";
+    }
+    return `Next: ${new Date(dateTime).toLocaleString()}`;
+}
+
+function renderDashboard(progress) {
+    progressCompletion.textContent = `${progress?.completionRate ?? 0}%`;
+    progressDue.textContent = progress?.dueReviews ?? 0;
+    progressReviewNeeded.textContent = progress?.reviewNeeded ?? 0;
+    levelProgress.innerHTML = "";
+
+    for (const level of progress?.levels || []) {
+        const item = document.createElement("article");
+        item.className = "level-progress-item";
+        item.innerHTML = `
+            <strong>${escapeHtml(level.jlptLevel)}</strong>
+            <span>${escapeHtml(level.completionRate)}%</span>
+            <progress max="100" value="${escapeHtml(level.completionRate)}"></progress>
+            <small>${escapeHtml(level.masteredCount)} / ${escapeHtml(level.totalWords)} mastered</small>
+        `;
+        levelProgress.appendChild(item);
+    }
+}
+
+async function loadDashboard() {
+    try {
+        renderDashboard(await fetchCollection("/api/words/dashboard"));
+    } catch (error) {
+        renderMessage(error.message);
+    }
 }
 
 function renderRows(page) {
@@ -76,8 +115,18 @@ function renderRows(page) {
                     <option value="MASTERED" ${word.studyStatus === "MASTERED" ? "selected" : ""}>MASTERED</option>
                 </select>
             </td>
+            <td>
+                <div class="review-actions">
+                    <button type="button" class="secondary" data-review="known" data-word-id="${escapeHtml(word.id)}">Known</button>
+                    <button type="button" class="danger" data-review="missed" data-word-id="${escapeHtml(word.id)}">Missed</button>
+                    <span class="table-note">${escapeHtml(formatDate(word.nextReviewAt))}</span>
+                </div>
+            </td>
         `;
         row.querySelector("[data-word-id]").addEventListener("change", handleStatusChange);
+        row.querySelectorAll("[data-review]").forEach((button) => {
+            button.addEventListener("click", handleReviewClick);
+        });
         tableBody.appendChild(row);
     }
 }
@@ -102,6 +151,9 @@ async function loadWords(page = 0) {
     if (currentStatus) {
         params.set("studyStatus", currentStatus);
     }
+    if (currentKeyword) {
+        params.set("keyword", currentKeyword);
+    }
 
     try {
         const data = await fetchCollection(`/api/words?${params.toString()}`);
@@ -123,11 +175,29 @@ async function handleStatusChange(event) {
         await patchResource(`/api/words/${select.dataset.wordId}/status`, {
             studyStatus: select.value
         });
+        await loadDashboard();
         await loadWords(currentPage);
     } catch (error) {
         renderMessage(error.message);
     } finally {
         select.disabled = false;
+    }
+}
+
+async function handleReviewClick(event) {
+    const button = event.currentTarget;
+    button.disabled = true;
+
+    try {
+        await patchResource(`/api/words/${button.dataset.wordId}/review`, {
+            correct: button.dataset.review === "known"
+        });
+        await loadDashboard();
+        await loadWords(currentPage);
+    } catch (error) {
+        renderMessage(error.message);
+    } finally {
+        button.disabled = false;
     }
 }
 
@@ -158,6 +228,7 @@ for (const button of levelButtons) {
 filterForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     currentStatus = filterForm.studyStatus.value;
+    currentKeyword = filterForm.keyword.value.trim();
     currentPageSize = Number(filterForm.pageSize.value);
     await loadWords(0);
 });
@@ -166,6 +237,7 @@ resetFiltersButton.addEventListener("click", async () => {
     filterForm.reset();
     currentLevel = "N5";
     currentStatus = "";
+    currentKeyword = "";
     currentPageSize = 25;
     renderActiveLevel();
     await loadWords(0);
@@ -185,4 +257,5 @@ nextButton.addEventListener("click", async () => {
 
 renderActiveLevel();
 await ensureLoggedIn();
+await loadDashboard();
 loadWords();
