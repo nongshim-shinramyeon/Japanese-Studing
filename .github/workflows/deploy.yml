@@ -83,7 +83,10 @@ jobs:
             "for attempt in \$(seq 1 30); do \
                if curl -fsS --max-time 3 http://127.0.0.1/ >/dev/null; then \
                  echo 'JLPTCloud responded locally on port 80'; \
-                 exit 0; \
+                 if curl -fsS --max-time 20 'http://127.0.0.1/api/words?size=1&sort=id,asc' >/dev/null; then \
+                   echo 'JLPTCloud words API responded locally'; \
+                   exit 0; \
+                 fi; \
                fi; \
                sleep 2; \
              done; \
@@ -109,7 +112,7 @@ jobs:
              curl -sS --max-time 5 -o /tmp/jlptcloud-root.out -w 'GET / -> %{http_code}\n' http://127.0.0.1/ || true && \
              head -c 500 /tmp/jlptcloud-root.out 2>/dev/null || true && \
              echo && \
-             curl -sS --max-time 5 -o /tmp/jlptcloud-words.out -w 'GET /api/words -> %{http_code}\n' http://127.0.0.1/api/words || true && \
+             curl -sS --max-time 30 -o /tmp/jlptcloud-words.out -w 'GET /api/words?size=1 -> %{http_code}\n' 'http://127.0.0.1/api/words?size=1&sort=id,asc' || true && \
              head -c 500 /tmp/jlptcloud-words.out 2>/dev/null || true && \
              echo && echo '## ufw status' && \
              sudo ufw status verbose || true && \

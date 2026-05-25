@@ -69,7 +69,7 @@ public class WordService {
             return getWordsByUserStatus(jlptLevel, studyStatus, normalizedKeyword, userId, pageable);
         }
 
-        Page<Word> words = wordRepository.search(jlptLevel, studyStatus, normalizedKeyword, pageable);
+        Page<Word> words = findWords(jlptLevel, studyStatus, normalizedKeyword, pageable);
         return toUserWordResponses(words, userId);
     }
 
@@ -173,7 +173,34 @@ public class WordService {
 
     private List<Word> loadScopedWords(JlptLevel jlptLevel, String keyword, Sort sort) {
         Sort effectiveSort = sort.isSorted() ? sort : Sort.by(Sort.Direction.ASC, "id");
+        if (keyword == null) {
+            if (jlptLevel != null) {
+                return wordRepository.findAllByJlptLevel(jlptLevel, effectiveSort);
+            }
+            return wordRepository.findAll(effectiveSort);
+        }
         return wordRepository.searchScoped(jlptLevel, keyword, effectiveSort);
+    }
+
+    private Page<Word> findWords(
+            JlptLevel jlptLevel,
+            StudyStatus studyStatus,
+            String keyword,
+            Pageable pageable
+    ) {
+        if (keyword != null) {
+            return wordRepository.search(jlptLevel, studyStatus, keyword, pageable);
+        }
+        if (jlptLevel != null && studyStatus != null) {
+            return wordRepository.findByJlptLevelAndStudyStatus(jlptLevel, studyStatus, pageable);
+        }
+        if (jlptLevel != null) {
+            return wordRepository.findByJlptLevel(jlptLevel, pageable);
+        }
+        if (studyStatus != null) {
+            return wordRepository.findByStudyStatus(studyStatus, pageable);
+        }
+        return wordRepository.findAll(pageable);
     }
 
     private Page<WordResponse> paginateResponses(List<WordResponse> responses, Pageable pageable) {
