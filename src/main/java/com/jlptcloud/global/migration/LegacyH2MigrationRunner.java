@@ -44,7 +44,8 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
             return;
         }
         if (migrationAlreadyRan()) {
-            log.info("Legacy H2 migration skipped because PostgreSQL already has app_user or word data.");
+            resetSequences();
+            log.info("Legacy H2 migration skipped because PostgreSQL already has app_user or word data. Sequences were synchronized.");
             return;
         }
 
@@ -242,7 +243,13 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
     }
 
     private void resetSequence(String table, String sequence) {
-        jdbcTemplate.update("select setval(?, coalesce((select max(id) from " + table + "), 1), true)", sequence);
+        jdbcTemplate.queryForObject("""
+                select setval(
+                    ?,
+                    greatest(coalesce((select max(id) from %s), 1), 1),
+                    (select count(*) from %s) > 0
+                )
+                """.formatted(table, table), Long.class, sequence);
     }
 
     private boolean legacyTableExists(Connection legacy, String tableName) throws SQLException {
