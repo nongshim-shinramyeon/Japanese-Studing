@@ -80,15 +80,15 @@ jobs:
         run: |
           ssh -i ~/.ssh/lightsail_key \
             "ubuntu@15.164.41.1" \
-            "for attempt in \$(seq 1 30); do \
-               if curl -fsS --max-time 3 http://127.0.0.1/ >/dev/null; then \
+            "for attempt in \$(seq 1 60); do \
+               if curl -fsS --max-time 10 http://127.0.0.1/ >/dev/null; then \
                  echo 'JLPTCloud responded locally on port 80'; \
                  if curl -fsS --max-time 20 'http://127.0.0.1/api/words?size=1&sort=id,asc' >/dev/null; then \
                    echo 'JLPTCloud words API responded locally'; \
                    exit 0; \
                  fi; \
                fi; \
-               sleep 2; \
+               sleep 3; \
              done; \
              cd ~/Japanese-Studing && \
              docker-compose ps && \
