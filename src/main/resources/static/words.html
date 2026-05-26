@@ -15,6 +15,7 @@
         <nav class="nav">
             <a href="/">Home</a>
             <a class="active" href="/words.html">Words</a>
+            <a href="/review-words.html">Review Words</a>
             <a href="/grammar-notes.html">Grammar Notes</a>
             <a href="/community.html">Community</a>
             <a href="/login.html" id="auth-link">Login</a>
@@ -25,8 +26,8 @@
         <div class="table-header compact">
             <div>
                 <p class="eyebrow">JLPT Word Book</p>
-                <h2>Level vocabulary</h2>
-                <p class="muted">Browse JLPT words and manage your own study status.</p>
+                <h2>First-pass vocabulary</h2>
+                <p class="muted">Read each word once, then send it to the review queue.</p>
             </div>
             <div class="stack">
                 <p class="table-note">Signed in as <strong id="current-user">-</strong></p>
@@ -44,13 +45,6 @@
         </div>
 
         <form id="word-filters" class="filters">
-            <select name="studyStatus" aria-label="Study status filter">
-                <option value="">All statuses</option>
-                <option value="NEW">NEW</option>
-                <option value="LEARNING">LEARNING</option>
-                <option value="REVIEW_NEEDED">REVIEW_NEEDED</option>
-                <option value="MASTERED">MASTERED</option>
-            </select>
             <input name="keyword" aria-label="Word search" placeholder="Search word, reading, or meaning">
             <select name="pageSize" aria-label="Page size">
                 <option value="10">10 per page</option>
@@ -65,9 +59,9 @@
 
         <section class="stat-grid progress-grid" aria-label="Study progress dashboard">
             <article class="stat">
-                <span class="eyebrow">Completion</span>
+                <span class="eyebrow">First Pass</span>
                 <strong id="progress-completion">0%</strong>
-                <span class="muted">Mastered words across the selected account.</span>
+                <span class="muted">Words marked as studied at least once.</span>
             </article>
             <article class="stat">
                 <span class="eyebrow">Due Reviews</span>
@@ -75,9 +69,9 @@
                 <span class="muted">Words scheduled for review now.</span>
             </article>
             <article class="stat">
-                <span class="eyebrow">Weak Points</span>
-                <strong id="progress-review-needed">0</strong>
-                <span class="muted">Words marked as review needed.</span>
+                <span class="eyebrow">Studied Words</span>
+                <strong id="progress-studied">0</strong>
+                <span class="muted">Vocabulary available in Review Words.</span>
             </article>
         </section>
         <div id="level-progress" class="level-progress"></div>
@@ -90,8 +84,7 @@
                     <th>Reading</th>
                     <th>Meaning</th>
                     <th>Level</th>
-                    <th>My status</th>
-                    <th>Review</th>
+                    <th>First pass</th>
                 </tr>
                 </thead>
                 <tbody id="word-table-body"></tbody>

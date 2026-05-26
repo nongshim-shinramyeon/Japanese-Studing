@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Words | JLPTCloud</title>
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+<div class="shell">
+    <header class="topbar">
+        <a class="brand" href="/">
+            <span>JLPTCloud</span>
+        </a>
+        <nav class="nav">
+            <a href="/">Home</a>
+            <a href="/words.html">Words</a>
+            <a class="active" href="/review-words.html">Review Words</a>
+            <a href="/grammar-notes.html">Grammar Notes</a>
+            <a href="/community.html">Community</a>
+            <a href="/login.html" id="auth-link">Login</a>
+        </nav>
+    </header>
+
+    <section class="panel word-browser">
+        <div class="table-header compact">
+            <div>
+                <p class="eyebrow">Memory Queue</p>
+                <h2>Review Words</h2>
+                <p class="muted">Words with lower memory scores appear first.</p>
+            </div>
+            <div class="stack">
+                <p class="table-note">Signed in as <strong id="current-user">-</strong></p>
+                <p class="table-note">Review items: <strong id="review-count">0</strong></p>
+            </div>
+        </div>
+
+        <div id="review-level-tabs" class="level-tabs" aria-label="JLPT level tabs">
+            <button type="button" class="level-tab" data-review-level="">All</button>
+            <button type="button" class="level-tab active" data-review-level="N5">N5</button>
+            <button type="button" class="level-tab" data-review-level="N4">N4</button>
+            <button type="button" class="level-tab" data-review-level="N3">N3</button>
+            <button type="button" class="level-tab" data-review-level="N2">N2</button>
+            <button type="button" class="level-tab" data-review-level="N1">N1</button>
+        </div>
+
+        <form id="review-filters" class="filters">
+            <input name="keyword" aria-label="Word search" placeholder="Search word, reading, or meaning">
+            <select name="pageSize" aria-label="Page size">
+                <option value="10">10 per page</option>
+                <option value="25" selected>25 per page</option>
+                <option value="50">50 per page</option>
+            </select>
+            <button type="submit" class="secondary">Apply filters</button>
+            <button type="button" id="review-reset-filters" class="secondary">Reset</button>
+        </form>
+
+        <div id="review-message" class="message" hidden></div>
+
+        <section class="stat-grid progress-grid" aria-label="Review progress dashboard">
+            <article class="stat">
+                <span class="eyebrow">Average Score</span>
+                <strong id="review-average-score">0</strong>
+                <span class="muted">Current memory score across studied words.</span>
+            </article>
+            <article class="stat">
+                <span class="eyebrow">Due Now</span>
+                <strong id="review-due">0</strong>
+                <span class="muted">Words whose next review time has arrived.</span>
+            </article>
+            <article class="stat">
+                <span class="eyebrow">Low Score</span>
+                <strong id="review-low-score">0</strong>
+                <span class="muted">Studied words currently below 70 points.</span>
+            </article>
+        </section>
+        <div id="review-level-progress" class="level-progress"></div>
+
+        <div class="table-wrap embedded">
+            <table>
+                <thead>
+                <tr>
+                    <th>Word</th>
+                    <th>Reading</th>
+                    <th>Meaning</th>
+                    <th>Level</th>
+                    <th>Memory</th>
+                    <th>Review</th>
+                </tr>
+                </thead>
+                <tbody id="review-table-body"></tbody>
+            </table>
+        </div>
+
+        <div id="review-empty" class="empty" hidden>No studied words yet. Mark words as studied from the Words tab first.</div>
+
+        <div class="table-header compact bottom">
+            <div class="pager">
+                <button type="button" id="review-prev-page" class="secondary">Previous</button>
+                <button type="button" id="review-next-page" class="secondary">Next</button>
+            </div>
+            <div class="stack page-meta">
+                <p class="table-note">Page: <strong id="review-page">1 / 1</strong></p>
+                <p class="table-note" id="review-range">Showing 0 items</p>
+            </div>
+        </div>
+    </section>
+</div>
+<script type="module" src="/js/review-words.js"></script>
+</body>
+</html>

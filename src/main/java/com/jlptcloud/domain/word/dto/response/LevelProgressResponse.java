@@ -6,9 +6,11 @@ public record LevelProgressResponse(
         JlptLevel jlptLevel,
         long totalWords,
         long newCount,
+        long studiedCount,
         long learningCount,
         long reviewNeededCount,
         long masteredCount,
-        int completionRate
+        int completionRate,
+        int averageMemoryScore
 ) {
 }

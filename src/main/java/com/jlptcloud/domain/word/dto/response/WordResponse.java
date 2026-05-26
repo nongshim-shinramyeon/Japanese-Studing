@@ -15,7 +15,14 @@ public record WordResponse(
         String exampleSentence,
         JlptLevel jlptLevel,
         StudyStatus studyStatus,
+        boolean studied,
+        Integer memoryStage,
+        Double memoryScore,
+        Double currentMemoryScore,
+        Integer reviewIntervalDays,
+        Boolean dueForReview,
         Integer correctStreak,
+        Integer correctCount,
         Integer wrongCount,
         Integer reviewCount,
         LocalDateTime nextReviewAt,
@@ -37,6 +44,13 @@ public record WordResponse(
                 word.getExampleSentence(),
                 word.getJlptLevel(),
                 studyStatus,
+                false,
+                0,
+                0.0,
+                0.0,
+                0,
+                false,
+                0,
                 0,
                 0,
                 0,
@@ -48,6 +62,10 @@ public record WordResponse(
     }
 
     public static WordResponse from(Word word, UserWordStatus userWordStatus) {
+        return from(word, userWordStatus, LocalDateTime.now());
+    }
+
+    public static WordResponse from(Word word, UserWordStatus userWordStatus, LocalDateTime now) {
         if (userWordStatus == null) {
             return from(word, StudyStatus.NEW);
         }
@@ -61,7 +79,14 @@ public record WordResponse(
                 word.getExampleSentence(),
                 word.getJlptLevel(),
                 userWordStatus.getStudyStatus(),
+                userWordStatus.isStudied(),
+                userWordStatus.getMemoryStage(),
+                roundScore(userWordStatus.getMemoryScore()),
+                roundScore(userWordStatus.currentMemoryScore(now)),
+                userWordStatus.reviewIntervalDays(),
+                userWordStatus.isDueForReview(now),
                 userWordStatus.getCorrectStreak(),
+                userWordStatus.getCorrectCount(),
                 userWordStatus.getWrongCount(),
                 userWordStatus.getReviewCount(),
                 userWordStatus.getNextReviewAt(),
@@ -69,5 +94,9 @@ public record WordResponse(
                 word.getCreatedAt(),
                 word.getUpdatedAt()
         );
+    }
+
+    private static double roundScore(double score) {
+        return Math.round(score * 10.0) / 10.0;
     }
 }

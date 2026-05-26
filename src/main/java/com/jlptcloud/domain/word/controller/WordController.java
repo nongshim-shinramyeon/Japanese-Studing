@@ -64,6 +64,17 @@ public class WordController {
         return ResponseEntity.ok(ApiResponse.success(wordService.getProgress(userId)));
     }
 
+    @GetMapping("/review")
+    public ResponseEntity<ApiResponse<Page<WordResponse>>> reviewWords(
+            @RequestParam(required = false) JlptLevel jlptLevel,
+            @RequestParam(required = false) String keyword,
+            @PageableDefault(size = 25) Pageable pageable,
+            HttpSession session
+    ) {
+        Long userId = (Long) session.getAttribute(AuthController.SESSION_USER_ID);
+        return ResponseEntity.ok(ApiResponse.success(wordService.getReviewWords(jlptLevel, keyword, userId, pageable)));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<WordResponse>> getWord(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(wordService.getWord(id)));
@@ -82,6 +93,15 @@ public class WordController {
     ) {
         Long userId = (Long) session.getAttribute(AuthController.SESSION_USER_ID);
         return ResponseEntity.ok(ApiResponse.success(wordService.updateStatus(id, request, userId)));
+    }
+
+    @PatchMapping("/{id}/study")
+    public ResponseEntity<ApiResponse<WordResponse>> markStudied(
+            @PathVariable Long id,
+            HttpSession session
+    ) {
+        Long userId = (Long) session.getAttribute(AuthController.SESSION_USER_ID);
+        return ResponseEntity.ok(ApiResponse.success(wordService.markStudied(id, userId)));
     }
 
     @PatchMapping("/{id}/review")

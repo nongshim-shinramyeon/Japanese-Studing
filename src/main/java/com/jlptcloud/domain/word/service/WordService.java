@@ -17,6 +17,7 @@ import com.jlptcloud.domain.word.repository.WordRepository;
 import com.jlptcloud.global.exception.BusinessException;
 import com.jlptcloud.global.exception.ErrorCode;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -110,29 +111,86 @@ public class WordService {
     }
 
     @Transactional
-    public WordResponse reviewWord(Long id, ReviewAnswerRequest request, Long userId) {
+    public WordResponse markStudied(Long id, Long userId) {
         AppUser user = authService.getUser(userId);
         Word word = findWord(id);
+        LocalDateTime now = LocalDateTime.now();
         UserWordStatus userWordStatus = userWordStatusRepository.findByUser_IdAndWord_Id(user.getId(), word.getId())
                 .orElseGet(() -> new UserWordStatus(user, word, StudyStatus.NEW));
 
-        userWordStatus.recordReview(Boolean.TRUE.equals(request.correct()), LocalDateTime.now());
+        userWordStatus.markStudied(now);
         userWordStatusRepository.save(userWordStatus);
-        return WordResponse.from(word, userWordStatus);
+        return WordResponse.from(word, userWordStatus, now);
+    }
+
+    @Transactional
+    public WordResponse reviewWord(Long id, ReviewAnswerRequest request, Long userId) {
+        AppUser user = authService.getUser(userId);
+        Word word = findWord(id);
+        LocalDateTime now = LocalDateTime.now();
+        UserWordStatus userWordStatus = userWordStatusRepository.findByUser_IdAndWord_Id(user.getId(), word.getId())
+                .orElseGet(() -> new UserWordStatus(user, word, StudyStatus.NEW));
+
+        userWordStatus.recordReview(Boolean.TRUE.equals(request.correct()), now);
+        userWordStatusRepository.save(userWordStatus);
+        return WordResponse.from(word, userWordStatus, now);
+    }
+
+    public Page<WordResponse> getReviewWords(
+            JlptLevel jlptLevel,
+            String keyword,
+            Long userId,
+            Pageable pageable
+    ) {
+        AppUser user = authService.getUser(userId);
+        LocalDateTime now = LocalDateTime.now();
+        String normalizedKeyword = normalizeKeyword(keyword);
+
+        List<WordResponse> responses = userWordStatusRepository.findByUser_IdAndStudiedTrue(user.getId())
+                .stream()
+                .filter(status -> jlptLevel == null || status.getWord().getJlptLevel() == jlptLevel)
+                .filter(status -> normalizedKeyword == null || matchesKeyword(status.getWord(), normalizedKeyword))
+                .map(status -> WordResponse.from(status.getWord(), status, now))
+                .sorted(Comparator
+                        .comparing(WordResponse::currentMemoryScore)
+                        .thenComparing(response -> response.nextReviewAt() == null ? LocalDateTime.MAX : response.nextReviewAt())
+                        .thenComparing(WordResponse::id))
+                .toList();
+
+        return paginateResponses(responses, pageable);
     }
 
     public StudyProgressResponse getProgress(Long userId) {
         AppUser user = authService.getUser(userId);
+        LocalDateTime now = LocalDateTime.now();
         long totalWords = wordRepository.count();
-        long dueReviews = userWordStatusRepository.countByUser_IdAndNextReviewAtLessThanEqual(user.getId(), LocalDateTime.now());
+        List<UserWordStatus> studiedStatuses = userWordStatusRepository.findByUser_IdAndStudiedTrue(user.getId());
+        long studiedWords = studiedStatuses.size();
+        long dueReviews = studiedStatuses.stream()
+                .filter(status -> status.isDueForReview(now))
+                .count();
+        long reviewNeeded = studiedStatuses.stream()
+                .filter(status -> status.currentMemoryScore(now) < 70)
+                .count();
+        long stageSevenWords = studiedStatuses.stream()
+                .filter(status -> status.getMemoryStage() == UserWordStatus.MAX_MEMORY_STAGE)
+                .count();
+        int averageMemoryScore = averageMemoryScore(studiedStatuses, now);
 
         List<LevelProgressResponse> levels = java.util.Arrays.stream(JlptLevel.values())
-                .map(level -> buildLevelProgress(user.getId(), level))
+                .map(level -> buildLevelProgress(level, studiedStatuses, now))
                 .toList();
 
-        long mastered = levels.stream().mapToLong(LevelProgressResponse::masteredCount).sum();
-        long reviewNeeded = levels.stream().mapToLong(LevelProgressResponse::reviewNeededCount).sum();
-        return new StudyProgressResponse(totalWords, dueReviews, reviewNeeded, completionRate(mastered, totalWords), levels);
+        return new StudyProgressResponse(
+                totalWords,
+                studiedWords,
+                dueReviews,
+                reviewNeeded,
+                completionRate(studiedWords, totalWords),
+                averageMemoryScore,
+                stageSevenWords,
+                levels
+        );
     }
 
     private Page<WordResponse> getWordsByUserStatus(
@@ -146,9 +204,10 @@ public class WordService {
         Map<Long, UserWordStatus> statuses = userWordStatusRepository.findByUser_IdAndWordIn(userId, scopedWords)
                 .stream()
                 .collect(Collectors.toMap(status -> status.getWord().getId(), Function.identity()));
+        LocalDateTime now = LocalDateTime.now();
 
         List<WordResponse> filteredResponses = scopedWords.stream()
-                .map(word -> WordResponse.from(word, statuses.get(word.getId())))
+                .map(word -> WordResponse.from(word, statuses.get(word.getId()), now))
                 .filter(response -> response.studyStatus() == studyStatus)
                 .toList();
 
@@ -164,9 +223,10 @@ public class WordService {
         Map<Long, UserWordStatus> statuses = userWordStatusRepository.findByUser_IdAndWordIn(userId, wordContent)
                 .stream()
                 .collect(Collectors.toMap(status -> status.getWord().getId(), Function.identity()));
+        LocalDateTime now = LocalDateTime.now();
 
         List<WordResponse> responses = wordContent.stream()
-                .map(word -> WordResponse.from(word, statuses.get(word.getId())))
+                .map(word -> WordResponse.from(word, statuses.get(word.getId()), now))
                 .toList();
         return new PageImpl<>(responses, words.getPageable(), words.getTotalElements());
     }
@@ -225,15 +285,37 @@ public class WordService {
         return keyword.trim();
     }
 
-    private LevelProgressResponse buildLevelProgress(Long userId, JlptLevel level) {
+    private LevelProgressResponse buildLevelProgress(
+            JlptLevel level,
+            List<UserWordStatus> studiedStatuses,
+            LocalDateTime now
+    ) {
         long total = wordRepository.countByJlptLevel(level);
-        long recorded = userWordStatusRepository.countByUser_IdAndWord_JlptLevel(userId, level);
-        long explicitNew = userWordStatusRepository.countByUser_IdAndWord_JlptLevelAndStudyStatus(userId, level, StudyStatus.NEW);
-        long learning = userWordStatusRepository.countByUser_IdAndWord_JlptLevelAndStudyStatus(userId, level, StudyStatus.LEARNING);
-        long reviewNeeded = userWordStatusRepository.countByUser_IdAndWord_JlptLevelAndStudyStatus(userId, level, StudyStatus.REVIEW_NEEDED);
-        long mastered = userWordStatusRepository.countByUser_IdAndWord_JlptLevelAndStudyStatus(userId, level, StudyStatus.MASTERED);
-        long newCount = Math.max(0, total - recorded + explicitNew);
-        return new LevelProgressResponse(level, total, newCount, learning, reviewNeeded, mastered, completionRate(mastered, total));
+        List<UserWordStatus> levelStatuses = studiedStatuses.stream()
+                .filter(status -> status.getWord().getJlptLevel() == level)
+                .toList();
+        long studiedCount = levelStatuses.size();
+        long learning = levelStatuses.stream()
+                .filter(status -> status.getMemoryStage() < UserWordStatus.MAX_MEMORY_STAGE)
+                .count();
+        long reviewNeeded = levelStatuses.stream()
+                .filter(status -> status.currentMemoryScore(now) < 70)
+                .count();
+        long mastered = levelStatuses.stream()
+                .filter(status -> status.getMemoryStage() == UserWordStatus.MAX_MEMORY_STAGE)
+                .count();
+        long newCount = Math.max(0, total - studiedCount);
+        return new LevelProgressResponse(
+                level,
+                total,
+                newCount,
+                studiedCount,
+                learning,
+                reviewNeeded,
+                mastered,
+                completionRate(studiedCount, total),
+                averageMemoryScore(levelStatuses, now)
+        );
     }
 
     private int completionRate(long mastered, long total) {
@@ -241,5 +323,22 @@ public class WordService {
             return 0;
         }
         return (int) Math.round((mastered * 100.0) / total);
+    }
+
+    private int averageMemoryScore(List<UserWordStatus> statuses, LocalDateTime now) {
+        if (statuses.isEmpty()) {
+            return 0;
+        }
+        return (int) Math.round(statuses.stream()
+                .mapToDouble(status -> status.currentMemoryScore(now))
+                .average()
+                .orElse(0.0));
+    }
+
+    private boolean matchesKeyword(Word word, String keyword) {
+        String lowerKeyword = keyword.toLowerCase();
+        return word.getJapanese().toLowerCase().contains(lowerKeyword)
+                || word.getReading().toLowerCase().contains(lowerKeyword)
+                || word.getMeaning().toLowerCase().contains(lowerKeyword);
     }
 }

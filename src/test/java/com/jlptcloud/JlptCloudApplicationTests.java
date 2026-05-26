@@ -193,6 +193,86 @@ public class JlptCloudApplicationTests {
     }
 
     @Test
+    void markingWordStudiedAddsItToReviewQueue() throws Exception {
+        Word firstWord = wordRepository.findAll(Sort.by(Sort.Direction.ASC, "id")).getFirst();
+
+        MvcResult signupResult = mockMvc.perform(post("/api/auth/signup")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "studied01",
+                                  "password": "1234"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) signupResult.getRequest().getSession(false);
+
+        mockMvc.perform(patch("/api/words/{id}/study", firstWord.getId())
+                        .session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.studied").value(true))
+                .andExpect(jsonPath("$.data.memoryStage").value(1))
+                .andExpect(jsonPath("$.data.memoryScore").value(100.0))
+                .andExpect(jsonPath("$.data.currentMemoryScore").value(100.0))
+                .andExpect(jsonPath("$.data.nextReviewAt").isNotEmpty());
+
+        mockMvc.perform(get("/api/words/review")
+                        .session(session)
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalElements").value(1))
+                .andExpect(jsonPath("$.data.content[*].id", hasItem(firstWord.getId().intValue())));
+    }
+
+    @Test
+    void reviewQueuePrioritizesLowerMemoryScore() throws Exception {
+        java.util.List<Word> words = wordRepository.findAll(Sort.by(Sort.Direction.ASC, "id"));
+        Word lowScoreWord = words.get(0);
+        Word highScoreWord = words.get(1);
+
+        MvcResult signupResult = mockMvc.perform(post("/api/auth/signup")
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "username": "reviewrank01",
+                                  "password": "1234"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        MockHttpSession session = (MockHttpSession) signupResult.getRequest().getSession(false);
+
+        mockMvc.perform(patch("/api/words/{id}/study", lowScoreWord.getId()).session(session))
+                .andExpect(status().isOk());
+        mockMvc.perform(patch("/api/words/{id}/study", highScoreWord.getId()).session(session))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(patch("/api/words/{id}/review", lowScoreWord.getId())
+                        .session(session)
+                        .contentType("application/json")
+                        .content("""
+                                {
+                                  "correct": false
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.currentMemoryScore").value(70.0));
+
+        mockMvc.perform(get("/api/words/review")
+                        .session(session)
+                        .param("page", "0")
+                        .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.totalElements").value(2))
+                .andExpect(jsonPath("$.data.content[0].id").value(lowScoreWord.getId().intValue()))
+                .andExpect(jsonPath("$.data.content[1].id").value(highScoreWord.getId().intValue()));
+    }
+
+    @Test
     void onlyCommentOwnerCanDeleteComment() throws Exception {
         MvcResult ownerSignup = mockMvc.perform(post("/api/auth/signup")
                         .contentType("application/json")

@@ -31,7 +31,7 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
     public LegacyH2MigrationRunner(
             DataSource dataSource,
             @Value("${jlptcloud.legacy-h2-migration.enabled:false}") boolean enabled,
-            @Value("${jlptcloud.legacy-h2-migration.url:jdbc:h2:file:/legacy-h2-data/sbb;MODE=MYSQL;IFEXISTS=TRUE;ACCESS_MODE_DATA=r}") String legacyUrl
+            @Value("${jlptcloud.legacy-h2-migration.url:jdbc:h2:file:/legacy-h2-data/jlptcloud;MODE=MYSQL;IFEXISTS=TRUE;ACCESS_MODE_DATA=r}") String legacyUrl
     ) {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
         this.enabled = enabled;
@@ -208,29 +208,72 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
             return;
         }
         List<Object[]> rows = query(legacy, """
-                select id, user_id, word_id, study_status, created_at, updated_at
+                select id, user_id, word_id, study_status, correct_streak, wrong_count,
+                       review_count, next_review_at, last_reviewed_at, created_at, updated_at
                 from user_word_status
                 order by id
-                """, row -> new Object[] {
-                        row.getLong("id"),
-                        row.getLong("user_id"),
-                        row.getLong("word_id"),
-                        row.getString("study_status"),
-                        0,
-                        0,
-                        0,
-                        null,
-                        null,
-                        timestamp(row, "created_at"),
-                        timestamp(row, "updated_at")
+                """, row -> {
+                    String studyStatus = row.getString("study_status");
+                    int wrongCount = row.getInt("wrong_count");
+                    int reviewCount = row.getInt("review_count");
+                    Timestamp createdAt = timestamp(row, "created_at");
+                    Timestamp updatedAt = timestamp(row, "updated_at");
+                    Timestamp lastReviewedAt = nullableTimestamp(row, "last_reviewed_at");
+                    Timestamp nextReviewAt = nullableTimestamp(row, "next_review_at");
+                    boolean studied = !"NEW".equals(studyStatus) || reviewCount > 0 || lastReviewedAt != null;
+                    int memoryStage = memoryStageFromStatus(studyStatus);
+                    double memoryScore = memoryScoreFromStatus(studyStatus);
+
+                    if (studied && lastReviewedAt == null) {
+                        lastReviewedAt = updatedAt != null ? updatedAt : createdAt;
+                    }
+                    if (studied && nextReviewAt == null && lastReviewedAt != null) {
+                        nextReviewAt = Timestamp.valueOf(lastReviewedAt.toLocalDateTime().plusDays(1));
+                    }
+
+                    return new Object[] {
+                            row.getLong("id"),
+                            row.getLong("user_id"),
+                            row.getLong("word_id"),
+                            studyStatus,
+                            studied,
+                            memoryStage,
+                            memoryScore,
+                            row.getInt("correct_streak"),
+                            Math.max(reviewCount - wrongCount, 0),
+                            wrongCount,
+                            reviewCount,
+                            nextReviewAt,
+                            lastReviewedAt,
+                            createdAt,
+                            updatedAt
+                    };
                 });
         jdbcTemplate.batchUpdate("""
-                insert into user_word_status (id, user_id, word_id, study_status, correct_streak, wrong_count,
+                insert into user_word_status (id, user_id, word_id, study_status, studied, memory_stage,
+                                              memory_score, correct_streak, correct_count, wrong_count,
                                               review_count, next_review_at, last_reviewed_at, created_at, updated_at)
-                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict (id) do nothing
                 """, rows);
         log.info("Migrated {} user word statuses from legacy H2.", rows.size());
+    }
+
+    private int memoryStageFromStatus(String studyStatus) {
+        return switch (studyStatus) {
+            case "MASTERED" -> 6;
+            case "LEARNING" -> 2;
+            default -> 1;
+        };
+    }
+
+    private double memoryScoreFromStatus(String studyStatus) {
+        return switch (studyStatus) {
+            case "MASTERED" -> 90.0;
+            case "LEARNING" -> 75.0;
+            case "REVIEW_NEEDED" -> 45.0;
+            default -> 0.0;
+        };
     }
 
     private void resetSequences() {
@@ -280,6 +323,10 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
             return timestamp;
         }
         return Timestamp.valueOf(LocalDateTime.now());
+    }
+
+    private Timestamp nullableTimestamp(ResultSet row, String column) throws SQLException {
+        return row.getTimestamp(column);
     }
 
     private Long nullableLong(ResultSet row, String column) throws SQLException {

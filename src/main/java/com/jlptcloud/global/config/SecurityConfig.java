@@ -49,6 +49,7 @@ public class SecurityConfig {
                                 "/index.html",
                                 "/login.html",
                                 "/words.html",
+                                "/review-words.html",
                                 "/grammar-notes.html",
                                 "/community.html",
                                 "/css/**",
@@ -57,7 +58,7 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/h2-console/**").denyAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/signup", "/api/auth/login").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/words/dashboard").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/words/dashboard", "/api/words/review").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/words/**", "/api/grammar-notes/**", "/api/community/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated()
                         .requestMatchers("/api/**").authenticated()

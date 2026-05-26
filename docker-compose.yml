@@ -17,7 +17,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - japanese-studying-data:/legacy-h2-data:ro
+      - jlptcloud-legacy-h2-data:/legacy-h2-data:ro
     restart: unless-stopped
 
   postgres:
@@ -37,5 +37,5 @@ services:
     restart: unless-stopped
 
 volumes:
-  japanese-studying-data:
+  jlptcloud-legacy-h2-data:
   jlptcloud-postgres-data:

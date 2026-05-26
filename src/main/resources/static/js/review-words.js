@@ -1,22 +1,22 @@
 import { createResource, fetchCollection, patchResource } from "./api.js";
 
-const tableBody = document.querySelector("#word-table-body");
-const emptyState = document.querySelector("#word-empty");
-const countTarget = document.querySelector("#word-count");
-const pageTarget = document.querySelector("#word-page");
-const rangeTarget = document.querySelector("#word-range");
-const messageBox = document.querySelector("#word-message");
-const progressCompletion = document.querySelector("#progress-completion");
-const progressDue = document.querySelector("#progress-due");
-const progressStudied = document.querySelector("#progress-studied");
-const levelProgress = document.querySelector("#level-progress");
-const prevButton = document.querySelector("#word-prev-page");
-const nextButton = document.querySelector("#word-next-page");
-const levelButtons = document.querySelectorAll("[data-level]");
+const tableBody = document.querySelector("#review-table-body");
+const emptyState = document.querySelector("#review-empty");
+const countTarget = document.querySelector("#review-count");
+const pageTarget = document.querySelector("#review-page");
+const rangeTarget = document.querySelector("#review-range");
+const messageBox = document.querySelector("#review-message");
+const averageScoreTarget = document.querySelector("#review-average-score");
+const dueTarget = document.querySelector("#review-due");
+const lowScoreTarget = document.querySelector("#review-low-score");
+const levelProgress = document.querySelector("#review-level-progress");
+const prevButton = document.querySelector("#review-prev-page");
+const nextButton = document.querySelector("#review-next-page");
+const levelButtons = document.querySelectorAll("[data-review-level]");
 const currentUser = document.querySelector("#current-user");
 const authLink = document.querySelector("#auth-link");
-const filterForm = document.querySelector("#word-filters");
-const resetFiltersButton = document.querySelector("#word-reset-filters");
+const filterForm = document.querySelector("#review-filters");
+const resetFiltersButton = document.querySelector("#review-reset-filters");
 
 let currentLevel = "N5";
 let currentKeyword = "";
@@ -44,10 +44,28 @@ function clearMessage() {
     messageBox.textContent = "";
 }
 
+function formatDate(dateTime) {
+    if (!dateTime) {
+        return "Next: not scheduled";
+    }
+
+    return `Next: ${new Date(dateTime).toLocaleDateString()}`;
+}
+
+function scoreClass(score) {
+    if (score < 50) {
+        return "low";
+    }
+    if (score < 80) {
+        return "mid";
+    }
+    return "high";
+}
+
 function renderDashboard(progress) {
-    progressCompletion.textContent = `${progress?.completionRate ?? 0}%`;
-    progressDue.textContent = progress?.dueReviews ?? 0;
-    progressStudied.textContent = progress?.studiedWords ?? 0;
+    averageScoreTarget.textContent = progress?.averageMemoryScore ?? 0;
+    dueTarget.textContent = progress?.dueReviews ?? 0;
+    lowScoreTarget.textContent = progress?.reviewNeeded ?? 0;
     levelProgress.innerHTML = "";
 
     for (const level of progress?.levels || []) {
@@ -55,9 +73,9 @@ function renderDashboard(progress) {
         item.className = "level-progress-item";
         item.innerHTML = `
             <strong>${escapeHtml(level.jlptLevel)}</strong>
-            <span>${escapeHtml(level.completionRate)}%</span>
-            <progress max="100" value="${escapeHtml(level.completionRate)}"></progress>
-            <small>${escapeHtml(level.studiedCount)} / ${escapeHtml(level.totalWords)} studied</small>
+            <span>${escapeHtml(level.averageMemoryScore)} pts</span>
+            <progress max="100" value="${escapeHtml(level.averageMemoryScore)}"></progress>
+            <small>${escapeHtml(level.masteredCount)} stage 7 / ${escapeHtml(level.studiedCount)} studied</small>
         `;
         levelProgress.appendChild(item);
     }
@@ -93,40 +111,50 @@ function renderRows(page) {
 
     emptyState.hidden = true;
     for (const word of items) {
+        const score = Number(word.currentMemoryScore ?? word.memoryScore ?? 0);
         const row = document.createElement("tr");
-        const studied = Boolean(word.studied);
         row.innerHTML = `
             <td><strong>${escapeHtml(word.japanese)}</strong></td>
             <td>${escapeHtml(word.reading)}</td>
             <td>${escapeHtml(word.meaning)}</td>
             <td><span class="pill">${escapeHtml(word.jlptLevel)}</span></td>
             <td>
+                <div class="score-cell">
+                    <div class="score-row">
+                        <strong>${escapeHtml(score.toFixed(1))}</strong>
+                        <span class="pill">Stage ${escapeHtml(word.memoryStage ?? 1)} / 7</span>
+                    </div>
+                    <div class="score-meter ${scoreClass(score)}">
+                        <span style="width: ${Math.max(0, Math.min(100, score))}%"></span>
+                    </div>
+                    <span class="table-note">${escapeHtml(formatDate(word.nextReviewAt))}</span>
+                </div>
+            </td>
+            <td>
                 <div class="review-actions">
-                    <button type="button"
-                            class="${studied ? "secondary" : "primary"}"
-                            data-study-word-id="${escapeHtml(word.id)}"
-                            ${studied ? "disabled" : ""}>${studied ? "Studied" : "Studied"}</button>
-                    <span class="table-note">${studied ? "In review queue" : "First pass"}</span>
+                    <button type="button" class="secondary" data-review="known" data-word-id="${escapeHtml(word.id)}">Known</button>
+                    <button type="button" class="danger" data-review="missed" data-word-id="${escapeHtml(word.id)}">Missed</button>
                 </div>
             </td>
         `;
-        row.querySelector("[data-study-word-id]").addEventListener("click", handleStudiedClick);
+        row.querySelectorAll("[data-review]").forEach((button) => {
+            button.addEventListener("click", handleReviewClick);
+        });
         tableBody.appendChild(row);
     }
 }
 
 function renderActiveLevel() {
     for (const button of levelButtons) {
-        button.classList.toggle("active", button.dataset.level === currentLevel);
+        button.classList.toggle("active", button.dataset.reviewLevel === currentLevel);
     }
 }
 
-async function loadWords(page = 0) {
+async function loadReviewWords(page = 0) {
     clearMessage();
     const params = new URLSearchParams({
         page: String(page),
-        size: String(currentPageSize),
-        sort: "id,asc"
+        size: String(currentPageSize)
     });
 
     if (currentLevel) {
@@ -137,9 +165,9 @@ async function loadWords(page = 0) {
     }
 
     try {
-        const data = await fetchCollection(`/api/words?${params.toString()}`);
+        const data = await fetchCollection(`/api/words/review?${params.toString()}`);
         if (page > 0 && (data?.content || []).length === 0 && (data?.totalElements || 0) > 0) {
-            await loadWords(Math.max(0, (data?.totalPages || 1) - 1));
+            await loadReviewWords(Math.max(0, (data?.totalPages || 1) - 1));
             return;
         }
         renderRows(data);
@@ -148,15 +176,17 @@ async function loadWords(page = 0) {
     }
 }
 
-async function handleStudiedClick(event) {
+async function handleReviewClick(event) {
     const button = event.currentTarget;
     button.disabled = true;
 
     try {
-        await patchResource(`/api/words/${button.dataset.studyWordId}/study`, {});
-        renderMessage("Moved to Review Words.", "success");
+        await patchResource(`/api/words/${button.dataset.wordId}/review`, {
+            correct: button.dataset.review === "known"
+        });
+        renderMessage("Review score updated.", "success");
         await loadDashboard();
-        await loadWords(currentPage);
+        await loadReviewWords(currentPage);
     } catch (error) {
         renderMessage(error.message);
     } finally {
@@ -182,9 +212,9 @@ async function ensureLoggedIn() {
 
 for (const button of levelButtons) {
     button.addEventListener("click", async () => {
-        currentLevel = button.dataset.level;
+        currentLevel = button.dataset.reviewLevel;
         renderActiveLevel();
-        await loadWords(0);
+        await loadReviewWords(0);
     });
 }
 
@@ -192,7 +222,7 @@ filterForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     currentKeyword = filterForm.keyword.value.trim();
     currentPageSize = Number(filterForm.pageSize.value);
-    await loadWords(0);
+    await loadReviewWords(0);
 });
 
 resetFiltersButton.addEventListener("click", async () => {
@@ -201,22 +231,22 @@ resetFiltersButton.addEventListener("click", async () => {
     currentKeyword = "";
     currentPageSize = 25;
     renderActiveLevel();
-    await loadWords(0);
+    await loadReviewWords(0);
 });
 
 prevButton.addEventListener("click", async () => {
     if (currentPage > 0) {
-        await loadWords(currentPage - 1);
+        await loadReviewWords(currentPage - 1);
     }
 });
 
 nextButton.addEventListener("click", async () => {
     if (currentPage + 1 < totalPages) {
-        await loadWords(currentPage + 1);
+        await loadReviewWords(currentPage + 1);
     }
 });
 
 renderActiveLevel();
 await ensureLoggedIn();
 await loadDashboard();
-loadWords();
+loadReviewWords();
