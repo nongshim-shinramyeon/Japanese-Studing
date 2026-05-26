@@ -53,6 +53,7 @@ public class SecurityConfig {
                                 "/grammar-notes.html",
                                 "/community.html",
                                 "/css/**",
+                                "/img/**",
                                 "/js/**",
                                 "/favicon.ico"
                         ).permitAll()
