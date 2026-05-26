@@ -75,21 +75,7 @@ textarea {
 .brand {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
     font-size: 0.98rem;
-    font-weight: 800;
-}
-
-.brand-badge {
-    display: grid;
-    width: 42px;
-    height: 42px;
-    place-items: center;
-    border: 2px solid var(--line);
-    border-radius: 2px;
-    background: var(--ink);
-    color: var(--paper);
-    font-size: 0.9rem;
     font-weight: 900;
 }
 
