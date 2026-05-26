@@ -6,7 +6,7 @@
     <title>JLPTCloud</title>
     <link rel="stylesheet" href="/css/app.css">
 </head>
-<body>
+<body class="home-page">
 <div class="shell">
     <header class="topbar">
         <a class="brand" href="/">
@@ -22,77 +22,75 @@
         </nav>
     </header>
 
-    <section class="hero">
-        <div>
-            <p class="eyebrow">JLPT progress tracker</p>
+    <section class="hero home-hero">
+        <div class="home-hero-copy">
+            <p class="eyebrow">Forgetting-curve JLPT training</p>
             <h1>JLPTCloud</h1>
+            <p class="home-slogan">Memory, measured. Japanese, retained.</p>
             <p>
-                A deployed Japanese learning service for tracking vocabulary, grammar notes,
-                review timing, and learner discussions from N5 to N1.
+                Turn vocabulary review into a timed memory system. JLPTCloud separates first-pass
+                study from repeat review, then ranks words by a live retention score.
             </p>
             <div class="hero-actions">
                 <a class="button-link primary" href="/words.html">Open Words</a>
                 <a class="button-link secondary" href="/review-words.html">Review Queue</a>
-                <a class="button-link secondary" href="/community.html">Open Community</a>
             </div>
-            <div class="stat-grid">
-                <article class="stat">
-                    <span class="eyebrow">Words</span>
-                    <strong>N5-N1</strong>
-                    <span class="muted">Search vocabulary by level, reading, and meaning.</span>
+            <div class="home-proof-row" aria-label="JLPTCloud system highlights">
+                <article>
+                    <span>01</span>
+                    <strong>First pass</strong>
+                    <small>Mark studied words once.</small>
                 </article>
-                <article class="stat">
-                    <span class="eyebrow">Grammar</span>
-                    <strong>Review</strong>
-                    <span class="muted">Track study status and scheduled review timing.</span>
+                <article>
+                    <span>02</span>
+                    <strong>Decay score</strong>
+                    <small>Rank weaker memories first.</small>
                 </article>
-                <article class="stat">
-                    <span class="eyebrow">Community</span>
-                    <strong>Secure</strong>
-                    <span class="muted">Session-based access control for write operations.</span>
+                <article>
+                    <span>03</span>
+                    <strong>7 stages</strong>
+                    <small>Stretch intervals over time.</small>
                 </article>
             </div>
         </div>
 
-        <div class="hero-aside">
-            <section class="summary">
-                <h3>Words</h3>
-                <p>Browse JLPT vocabulary by level and mark words after the first pass.</p>
-            </section>
-            <section class="summary">
-                <h3>Review Words</h3>
-                <p>Review studied words in memory-score order with Known and Missed feedback.</p>
-            </section>
-            <section class="summary">
-                <h3>Grammar Notes</h3>
-                <p>Keep grammar patterns, explanations, and example sentences organized by level.</p>
-            </section>
-            <section class="summary">
-                <h3>Community</h3>
-                <p>Discuss study questions with authenticated posts, comments, and replies.</p>
-            </section>
+        <div class="home-equation" aria-label="Memory score formula">
+            <span>currentScore</span>
+            <strong>memoryScore x 0.7<sup>days / interval</sup></strong>
+            <small>Known raises the stage. Missed pulls the word back into focus.</small>
         </div>
     </section>
 
-    <section class="grid">
+    <section class="home-feature-strip" aria-label="JLPTCloud product modules">
+        <div>
+            <p class="eyebrow">Study loop</p>
+            <h2>From first contact to long-term recall.</h2>
+        </div>
+        <p>
+            Built as a full-stack portfolio service with Spring Boot, PostgreSQL, Flyway,
+            Spring Security, and CI/CD deployment.
+        </p>
+    </section>
+
+    <section class="grid home-grid">
         <article class="card">
-            <p class="eyebrow">Words</p>
-            <h3>Vocabulary Notebook</h3>
-            <p class="muted">Search JLPT vocabulary and mark first-pass study.</p>
+            <p class="eyebrow">01 Words</p>
+            <h3>First-pass vocabulary</h3>
+            <p class="muted">Search N5-N1 words and send studied items into the review queue.</p>
             <div class="hero-actions">
                 <a class="button-link primary" href="/words.html">Open</a>
             </div>
         </article>
         <article class="card">
-            <p class="eyebrow">Review</p>
-            <h3>Memory Queue</h3>
-            <p class="muted">Prioritize studied words by forgetting-curve score.</p>
+            <p class="eyebrow">02 Review</p>
+            <h3>Forgetting-curve queue</h3>
+            <p class="muted">Known and Missed feedback reshapes each word's score and interval.</p>
             <div class="hero-actions">
                 <a class="button-link primary" href="/review-words.html">Open</a>
             </div>
         </article>
         <article class="card">
-            <p class="eyebrow">Grammar</p>
+            <p class="eyebrow">03 Grammar</p>
             <h3>Grammar Notes</h3>
             <p class="muted">Save grammar patterns and example sentences.</p>
             <div class="hero-actions">
@@ -100,7 +98,7 @@
             </div>
         </article>
         <article class="card">
-            <p class="eyebrow">Community</p>
+            <p class="eyebrow">04 Community</p>
             <h3>Discussion Board</h3>
             <p class="muted">Write posts and join simple discussions.</p>
             <div class="hero-actions">
