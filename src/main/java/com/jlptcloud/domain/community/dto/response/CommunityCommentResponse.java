@@ -17,14 +17,14 @@ public record CommunityCommentResponse(
         return from(comment, null);
     }
 
-    public static CommunityCommentResponse from(CommunityComment comment, String currentOwnerKey) {
+    public static CommunityCommentResponse from(CommunityComment comment, Long currentUserId) {
         return new CommunityCommentResponse(
                 comment.getId(),
                 comment.getPost().getId(),
                 comment.getParent() != null ? comment.getParent().getId() : null,
                 comment.getAuthorName(),
                 comment.getContent(),
-                currentOwnerKey != null && comment.isOwnedBy(currentOwnerKey),
+                currentUserId != null && comment.isOwnedBy(currentUserId),
                 comment.getCreatedAt(),
                 comment.getUpdatedAt()
         );

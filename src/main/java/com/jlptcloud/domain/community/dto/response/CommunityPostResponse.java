@@ -16,13 +16,13 @@ public record CommunityPostResponse(
         return from(post, null);
     }
 
-    public static CommunityPostResponse from(CommunityPost post, String currentOwnerKey) {
+    public static CommunityPostResponse from(CommunityPost post, Long currentUserId) {
         return new CommunityPostResponse(
                 post.getId(),
                 post.getAuthorName(),
                 post.getTitle(),
                 post.getContent(),
-                currentOwnerKey != null && post.isOwnedBy(currentOwnerKey),
+                currentUserId != null && post.isOwnedBy(currentUserId),
                 post.getCreatedAt(),
                 post.getUpdatedAt()
         );

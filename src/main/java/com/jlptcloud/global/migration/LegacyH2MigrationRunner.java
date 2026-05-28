@@ -23,6 +23,8 @@ import org.springframework.stereotype.Component;
 public class LegacyH2MigrationRunner implements CommandLineRunner {
 
     private static final Logger log = LoggerFactory.getLogger(LegacyH2MigrationRunner.class);
+    private static final String LEGACY_USERNAME = "legacy_user";
+    private static final String LEGACY_PASSWORD_HASH = "$2a$10$dXJ3SW6G7P50lGmMkkLx3uM9QlrUdZ9S4G8czhGAP0fsdImXvI1qS";
 
     private final JdbcTemplate jdbcTemplate;
     private final boolean enabled;
@@ -156,6 +158,7 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
         if (!legacyTableExists(legacy, "COMMUNITY_POST")) {
             return;
         }
+        Long legacyUserId = ensureLegacyUser();
         List<Object[]> rows = query(legacy, """
                 select id, author_name, title, content, owner_key, created_at, updated_at
                 from community_post
@@ -165,12 +168,12 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
                         row.getString("author_name"),
                         row.getString("title"),
                         row.getString("content"),
-                        defaultString(row.getString("owner_key"), "legacy-post:" + row.getLong("id")),
+                        ownerUserId(row.getString("owner_key"), legacyUserId),
                         timestamp(row, "created_at"),
                         timestamp(row, "updated_at")
                 });
         jdbcTemplate.batchUpdate("""
-                insert into community_post (id, author_name, title, content, owner_key, created_at, updated_at)
+                insert into community_post (id, author_name, title, content, user_id, created_at, updated_at)
                 values (?, ?, ?, ?, ?, ?, ?)
                 on conflict (id) do nothing
                 """, rows);
@@ -181,6 +184,7 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
         if (!legacyTableExists(legacy, "COMMUNITY_COMMENT")) {
             return;
         }
+        Long legacyUserId = ensureLegacyUser();
         List<Object[]> rows = query(legacy, """
                 select id, post_id, parent_id, author_name, content, created_at, updated_at
                 from community_comment
@@ -191,12 +195,12 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
                         nullableLong(row, "parent_id"),
                         row.getString("author_name"),
                         row.getString("content"),
-                        "legacy-comment:" + row.getLong("id"),
+                        legacyUserId,
                         timestamp(row, "created_at"),
                         timestamp(row, "updated_at")
                 });
         jdbcTemplate.batchUpdate("""
-                insert into community_comment (id, post_id, parent_id, author_name, content, owner_key, created_at, updated_at)
+                insert into community_comment (id, post_id, parent_id, author_name, content, user_id, created_at, updated_at)
                 values (?, ?, ?, ?, ?, ?, ?, ?)
                 on conflict (id) do nothing
                 """, rows);
@@ -334,8 +338,28 @@ public class LegacyH2MigrationRunner implements CommandLineRunner {
         return row.wasNull() ? null : value;
     }
 
-    private String defaultString(String value, String fallback) {
-        return value == null || value.isBlank() ? fallback : value;
+    private Long ensureLegacyUser() {
+        jdbcTemplate.update("""
+                insert into app_user (username, password_hash, created_at, updated_at)
+                values (?, ?, current_timestamp, current_timestamp)
+                on conflict (username) do nothing
+                """, LEGACY_USERNAME, LEGACY_PASSWORD_HASH);
+        return jdbcTemplate.queryForObject("select id from app_user where username = ?", Long.class, LEGACY_USERNAME);
+    }
+
+    private Long ownerUserId(String ownerKey, Long fallbackUserId) {
+        if (ownerKey != null && ownerKey.startsWith("user:")) {
+            try {
+                Long userId = Long.valueOf(ownerKey.substring("user:".length()));
+                Long count = jdbcTemplate.queryForObject("select count(*) from app_user where id = ?", Long.class, userId);
+                if (count != null && count > 0) {
+                    return userId;
+                }
+            } catch (NumberFormatException ignored) {
+                return fallbackUserId;
+            }
+        }
+        return fallbackUserId;
     }
 
     @FunctionalInterface

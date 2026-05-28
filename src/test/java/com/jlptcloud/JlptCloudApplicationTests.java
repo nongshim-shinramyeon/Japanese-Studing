@@ -1,5 +1,6 @@
 package com.jlptcloud;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
@@ -10,6 +11,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.jlptcloud.domain.community.repository.CommunityCommentRepository;
+import com.jlptcloud.domain.community.repository.CommunityPostRepository;
 import com.jlptcloud.domain.word.entity.Word;
 import com.jlptcloud.domain.word.repository.WordRepository;
 import com.jayway.jsonpath.JsonPath;
@@ -33,6 +36,12 @@ public class JlptCloudApplicationTests {
 
     @Autowired
     private WordRepository wordRepository;
+
+    @Autowired
+    private CommunityPostRepository communityPostRepository;
+
+    @Autowired
+    private CommunityCommentRepository communityCommentRepository;
 
     @Test
     void signupCreatesSessionAndReturnsNormalizedUsername() throws Exception {
@@ -297,8 +306,12 @@ public class JlptCloudApplicationTests {
                                 }
                                 """))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.ownedByCurrentUser").value(true))
                 .andReturn();
         Integer postId = JsonPath.read(postResult.getResponse().getContentAsString(), "$.data.id");
+        Integer ownerUserId = JsonPath.read(ownerSignup.getResponse().getContentAsString(), "$.data.id");
+        assertThat(communityPostRepository.findById(postId.longValue()).orElseThrow().getUser().getId())
+                .isEqualTo(ownerUserId.longValue());
 
         MvcResult commentResult = mockMvc.perform(post("/api/community/posts/{postId}/comments", postId)
                         .session(ownerSession)
@@ -311,8 +324,11 @@ public class JlptCloudApplicationTests {
                                 }
                                 """))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.data.ownedByCurrentUser").value(true))
                 .andReturn();
         Integer commentId = JsonPath.read(commentResult.getResponse().getContentAsString(), "$.data.id");
+        assertThat(communityCommentRepository.findById(commentId.longValue()).orElseThrow().getUser().getId())
+                .isEqualTo(ownerUserId.longValue());
 
         MvcResult otherSignup = mockMvc.perform(post("/api/auth/signup")
                         .contentType("application/json")
@@ -332,3 +348,4 @@ public class JlptCloudApplicationTests {
                 .andExpect(jsonPath("$.error.code").value("COMMUNITY_COMMENT_FORBIDDEN"));
     }
 }
+

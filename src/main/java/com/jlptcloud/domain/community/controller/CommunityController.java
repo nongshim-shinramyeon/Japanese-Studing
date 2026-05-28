@@ -41,8 +41,8 @@ public class CommunityController {
             @Valid @RequestBody CommunityPostRequest request,
             HttpSession session
     ) {
-        String ownerKey = currentOwnerKey(session);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(communityService.createPost(request, ownerKey)));
+        Long userId = currentUserId(session);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(communityService.createPost(request, userId)));
     }
 
     @GetMapping("/posts")
@@ -50,12 +50,12 @@ public class CommunityController {
             @PageableDefault(size = 8, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
             HttpSession session
     ) {
-        return ResponseEntity.ok(ApiResponse.success(communityService.getPosts(pageable, optionalOwnerKey(session))));
+        return ResponseEntity.ok(ApiResponse.success(communityService.getPosts(pageable, optionalUserId(session))));
     }
 
     @GetMapping("/posts/{postId}")
     public ResponseEntity<ApiResponse<CommunityPostResponse>> getPost(@PathVariable Long postId, HttpSession session) {
-        return ResponseEntity.ok(ApiResponse.success(communityService.getPost(postId, optionalOwnerKey(session))));
+        return ResponseEntity.ok(ApiResponse.success(communityService.getPost(postId, optionalUserId(session))));
     }
 
     @PutMapping("/posts/{postId}")
@@ -64,7 +64,7 @@ public class CommunityController {
             @Valid @RequestBody CommunityPostRequest request,
             HttpSession session
     ) {
-        return ResponseEntity.ok(ApiResponse.success(communityService.updatePost(postId, request, currentOwnerKey(session))));
+        return ResponseEntity.ok(ApiResponse.success(communityService.updatePost(postId, request, currentUserId(session))));
     }
 
     @DeleteMapping("/posts/{postId}")
@@ -72,7 +72,7 @@ public class CommunityController {
             @PathVariable Long postId,
             HttpSession session
     ) {
-        communityService.deletePost(postId, currentOwnerKey(session));
+        communityService.deletePost(postId, currentUserId(session));
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
@@ -82,8 +82,8 @@ public class CommunityController {
             @Valid @RequestBody CommunityCommentRequest request,
             HttpSession session
     ) {
-        String ownerKey = currentOwnerKey(session);
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(communityService.createComment(postId, request, ownerKey)));
+        Long userId = currentUserId(session);
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(communityService.createComment(postId, request, userId)));
     }
 
     @GetMapping("/posts/{postId}/comments")
@@ -92,7 +92,7 @@ public class CommunityController {
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable,
             HttpSession session
     ) {
-        return ResponseEntity.ok(ApiResponse.success(communityService.getComments(postId, pageable, optionalOwnerKey(session))));
+        return ResponseEntity.ok(ApiResponse.success(communityService.getComments(postId, pageable, optionalUserId(session))));
     }
 
     @PutMapping("/comments/{commentId}")
@@ -101,29 +101,24 @@ public class CommunityController {
             @Valid @RequestBody CommunityCommentRequest request,
             HttpSession session
     ) {
-        return ResponseEntity.ok(ApiResponse.success(communityService.updateComment(commentId, request, currentOwnerKey(session))));
+        return ResponseEntity.ok(ApiResponse.success(communityService.updateComment(commentId, request, currentUserId(session))));
     }
 
     @DeleteMapping("/comments/{commentId}")
     public ResponseEntity<ApiResponse<Void>> deleteComment(@PathVariable Long commentId, HttpSession session) {
-        communityService.deleteComment(commentId, currentOwnerKey(session));
+        communityService.deleteComment(commentId, currentUserId(session));
         return ResponseEntity.ok(ApiResponse.success(null));
     }
 
-    private String optionalOwnerKey(HttpSession session) {
-        Long userId = (Long) session.getAttribute(AuthController.SESSION_USER_ID);
-        return userId != null ? ownerKey(userId) : null;
+    private Long optionalUserId(HttpSession session) {
+        return (Long) session.getAttribute(AuthController.SESSION_USER_ID);
     }
 
-    private String currentOwnerKey(HttpSession session) {
+    private Long currentUserId(HttpSession session) {
         Long userId = (Long) session.getAttribute(AuthController.SESSION_USER_ID);
         if (userId == null) {
             throw new BusinessException(ErrorCode.UNAUTHORIZED);
         }
-        return ownerKey(userId);
-    }
-
-    private String ownerKey(Long userId) {
-        return "user:" + userId;
+        return userId;
     }
 }

@@ -1,11 +1,15 @@
 package com.jlptcloud.domain.community.entity;
 
+import com.jlptcloud.domain.user.entity.AppUser;
 import com.jlptcloud.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 
 @Entity
 public class CommunityPost extends BaseTimeEntity {
@@ -13,6 +17,10 @@ public class CommunityPost extends BaseTimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUser user;
 
     @Column(nullable = false, length = 80)
     private String authorName;
@@ -23,17 +31,14 @@ public class CommunityPost extends BaseTimeEntity {
     @Column(nullable = false, length = 3000)
     private String content;
 
-    @Column(nullable = false, length = 120, updatable = false)
-    private String ownerKey;
-
     protected CommunityPost() {
     }
 
-    public CommunityPost(String authorName, String title, String content, String ownerKey) {
+    public CommunityPost(AppUser user, String authorName, String title, String content) {
+        this.user = user;
         this.authorName = authorName;
         this.title = title;
         this.content = content;
-        this.ownerKey = ownerKey;
     }
 
     public void update(String authorName, String title, String content) {
@@ -42,12 +47,16 @@ public class CommunityPost extends BaseTimeEntity {
         this.content = content;
     }
 
-    public boolean isOwnedBy(String ownerKey) {
-        return this.ownerKey.equals(ownerKey);
+    public boolean isOwnedBy(Long userId) {
+        return this.user.getId().equals(userId);
     }
 
     public Long getId() {
         return id;
+    }
+
+    public AppUser getUser() {
+        return user;
     }
 
     public String getAuthorName() {
@@ -62,7 +71,4 @@ public class CommunityPost extends BaseTimeEntity {
         return content;
     }
 
-    public String getOwnerKey() {
-        return ownerKey;
-    }
 }

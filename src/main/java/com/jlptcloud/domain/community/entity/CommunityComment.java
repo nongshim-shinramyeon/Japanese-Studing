@@ -1,5 +1,6 @@
 package com.jlptcloud.domain.community.entity;
 
+import com.jlptcloud.domain.user.entity.AppUser;
 import com.jlptcloud.global.entity.BaseTimeEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,24 +26,25 @@ public class CommunityComment extends BaseTimeEntity {
     @JoinColumn(name = "parent_id")
     private CommunityComment parent;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false)
+    private AppUser user;
+
     @Column(nullable = false, length = 80)
     private String authorName;
 
     @Column(nullable = false, length = 1200)
     private String content;
 
-    @Column(nullable = false, length = 120, updatable = false)
-    private String ownerKey;
-
     protected CommunityComment() {
     }
 
-    public CommunityComment(CommunityPost post, CommunityComment parent, String authorName, String content, String ownerKey) {
+    public CommunityComment(CommunityPost post, CommunityComment parent, AppUser user, String authorName, String content) {
         this.post = post;
         this.parent = parent;
+        this.user = user;
         this.authorName = authorName;
         this.content = content;
-        this.ownerKey = ownerKey;
     }
 
     public void update(String authorName, String content) {
@@ -62,6 +64,10 @@ public class CommunityComment extends BaseTimeEntity {
         return parent;
     }
 
+    public AppUser getUser() {
+        return user;
+    }
+
     public String getAuthorName() {
         return authorName;
     }
@@ -70,11 +76,7 @@ public class CommunityComment extends BaseTimeEntity {
         return content;
     }
 
-    public boolean isOwnedBy(String ownerKey) {
-        return this.ownerKey.equals(ownerKey);
-    }
-
-    public String getOwnerKey() {
-        return ownerKey;
+    public boolean isOwnedBy(Long userId) {
+        return this.user.getId().equals(userId);
     }
 }
