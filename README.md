@@ -254,20 +254,6 @@ Services:
 
 The public domain is served through Cloudflare.
 
-### Legacy H2 Migration
-
-The production compose file mounts the previous H2 Docker volume at `/legacy-h2-data` and enables a one-time migration runner with `JLPTCLOUD_LEGACY_H2_MIGRATION_ENABLED=true`.
-
-On first PostgreSQL startup, JLPTCloud copies legacy H2 data into PostgreSQL if the new database is empty:
-
-- users
-- words
-- grammar notes
-- community posts
-- community comments
-- user word statuses
-
-If PostgreSQL already contains users or words, the migration is skipped to prevent duplicate imports. Legacy comment ownership cannot be mapped to authenticated users, so migrated comments are preserved as read-only legacy comments.
 
 ## Testing
 
