@@ -1,28 +1,32 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const WIDTH = 1920;
-const HEIGHT = 1320;
+const W = 2000;
+const H = 1320;
 
-const colors = {
-  canvas: "#FFFFFF",
-  ink: "#161616",
-  muted: "#525252",
-  grid: "#D6D6D6",
-  header: "#A8A8A8",
-  keyCell: "#F4F4F4",
-  blue: "#0043CE",
-  blueDark: "#002D9C",
-  blueLight: "#EDF5FF",
+const palette = {
+  canvas: "#F5F5F7",
+  card: "#FFFFFF",
+  header: "#E8E8ED",
+  key: "#F5F5F7",
+  ink: "#1D1D1F",
+  secondary: "#6E6E73",
+  border: "#C7C7CC",
+  rule: "#D2D2D7",
+  blue: "#007AFF",
+  blueDeep: "#0055B3",
+  blueSoft: "#EAF3FF",
 };
+
+const CARD_W = 430;
+const HEADER_H = 48;
+const ROW_H = 37;
+const KEY_W = 58;
+const NAME_W = 206;
 
 const tables = [
   {
-    id: "word",
-    title: "WORD",
-    x: 60,
-    y: 70,
-    width: 400,
+    title: "WORD", x: 55, y: 60,
     rows: [
       ["PK", "ID", "BIGINT"],
       ["", "JAPANESE", "VARCHAR(100)"],
@@ -37,11 +41,7 @@ const tables = [
     ],
   },
   {
-    id: "user",
-    title: "APP_USER",
-    x: 760,
-    y: 70,
-    width: 400,
+    title: "APP_USER", x: 785, y: 60,
     rows: [
       ["PK", "ID", "BIGINT"],
       ["UK", "USERNAME", "VARCHAR(50)"],
@@ -51,11 +51,7 @@ const tables = [
     ],
   },
   {
-    id: "grammar",
-    title: "GRAMMAR_NOTE",
-    x: 1460,
-    y: 70,
-    width: 400,
+    title: "GRAMMAR_NOTE", x: 1515, y: 60,
     rows: [
       ["PK", "ID", "BIGINT"],
       ["", "TITLE", "VARCHAR(120)"],
@@ -70,11 +66,7 @@ const tables = [
     ],
   },
   {
-    id: "status",
-    title: "USER_WORD_STATUS",
-    x: 60,
-    y: 650,
-    width: 400,
+    title: "USER_WORD_STATUS", x: 55, y: 680,
     rows: [
       ["PK", "ID", "BIGINT"],
       ["FK", "USER_ID", "BIGINT"],
@@ -94,11 +86,7 @@ const tables = [
     ],
   },
   {
-    id: "post",
-    title: "COMMUNITY_POST",
-    x: 760,
-    y: 820,
-    width: 400,
+    title: "COMMUNITY_POST", x: 785, y: 880,
     rows: [
       ["PK", "ID", "BIGINT"],
       ["FK", "USER_ID", "BIGINT"],
@@ -110,11 +98,7 @@ const tables = [
     ],
   },
   {
-    id: "comment",
-    title: "COMMUNITY_COMMENT",
-    x: 1460,
-    y: 690,
-    width: 400,
+    title: "COMMUNITY_COMMENT", x: 1515, y: 760,
     rows: [
       ["PK", "ID", "BIGINT"],
       ["FK", "POST_ID", "BIGINT"],
@@ -128,187 +112,142 @@ const tables = [
   },
 ];
 
-const HEADER_HEIGHT = 42;
-const ROW_HEIGHT = 38;
-const KEY_WIDTH = 56;
-const NAME_WIDTH = 186;
+const esc = (text) => text.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+const cardHeight = (table) => HEADER_H + table.rows.length * ROW_H;
 
-function escapeXml(value) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function tableHeight(table) {
-  return HEADER_HEIGHT + table.rows.length * ROW_HEIGHT;
-}
-
-function tableSvg(table) {
-  const height = tableHeight(table);
-  const rowElements = table.rows
-    .map(([key, name, type], index) => {
-      const y = table.y + HEADER_HEIGHT + index * ROW_HEIGHT;
-      const keyFill = key ? colors.keyCell : colors.canvas;
-      return `
-        <rect x="${table.x}" y="${y}" width="${KEY_WIDTH}" height="${ROW_HEIGHT}" fill="${keyFill}"/>
-        <line x1="${table.x + KEY_WIDTH}" y1="${y}" x2="${table.x + KEY_WIDTH}" y2="${y + ROW_HEIGHT}" class="cell-line"/>
-        <line x1="${table.x + KEY_WIDTH + NAME_WIDTH}" y1="${y}" x2="${table.x + KEY_WIDTH + NAME_WIDTH}" y2="${y + ROW_HEIGHT}" class="cell-line"/>
-        <line x1="${table.x}" y1="${y + ROW_HEIGHT}" x2="${table.x + table.width}" y2="${y + ROW_HEIGHT}" class="cell-line"/>
-        <text x="${table.x + KEY_WIDTH / 2}" y="${y + 24}" text-anchor="middle" class="key">${escapeXml(key)}</text>
-        <text x="${table.x + KEY_WIDTH + 16}" y="${y + 24}" class="column">${escapeXml(name)}</text>
-        <text x="${table.x + KEY_WIDTH + NAME_WIDTH + 16}" y="${y + 24}" class="type">${escapeXml(type)}</text>
-      `;
-    })
-    .join("");
+function table(table) {
+  const height = cardHeight(table);
+  const rows = table.rows.map(([key, name, type], i) => {
+    const y = table.y + HEADER_H + i * ROW_H;
+    return `
+      <rect x="${table.x}" y="${y}" width="${KEY_W}" height="${ROW_H}" fill="${key ? palette.key : palette.card}"/>
+      <line x1="${table.x + KEY_W}" y1="${y}" x2="${table.x + KEY_W}" y2="${y + ROW_H}" class="rule"/>
+      <line x1="${table.x + KEY_W + NAME_W}" y1="${y}" x2="${table.x + KEY_W + NAME_W}" y2="${y + ROW_H}" class="rule"/>
+      ${i < table.rows.length - 1 ? `<line x1="${table.x}" y1="${y + ROW_H}" x2="${table.x + CARD_W}" y2="${y + ROW_H}" class="rule"/>` : ""}
+      <text x="${table.x + KEY_W / 2}" y="${y + 24}" text-anchor="middle" class="key-text">${esc(key)}</text>
+      <text x="${table.x + KEY_W + 16}" y="${y + 24}" class="name-text">${esc(name)}</text>
+      <text x="${table.x + KEY_W + NAME_W + 16}" y="${y + 24}" class="type-text">${esc(type)}</text>
+    `;
+  }).join("");
 
   return `
-    <g id="${table.id}" filter="url(#tableShadow)">
-      <rect x="${table.x}" y="${table.y}" width="${table.width}" height="${height}" rx="2" fill="${colors.canvas}" class="table-border"/>
-      <rect x="${table.x}" y="${table.y}" width="${table.width}" height="${HEADER_HEIGHT}" rx="2" fill="${colors.header}"/>
-      <line x1="${table.x}" y1="${table.y + HEADER_HEIGHT}" x2="${table.x + table.width}" y2="${table.y + HEADER_HEIGHT}" class="table-border"/>
-      <text x="${table.x + table.width / 2}" y="${table.y + 27}" text-anchor="middle" class="table-title">${table.title}</text>
-      ${rowElements}
+    <g filter="url(#cardShadow)">
+      <rect x="${table.x}" y="${table.y}" width="${CARD_W}" height="${height}" rx="12" fill="${palette.card}" stroke="${palette.border}" stroke-width="1.4"/>
+      <path d="M ${table.x + 12} ${table.y} H ${table.x + CARD_W - 12} Q ${table.x + CARD_W} ${table.y} ${table.x + CARD_W} ${table.y + 12} V ${table.y + HEADER_H} H ${table.x} V ${table.y + 12} Q ${table.x} ${table.y} ${table.x + 12} ${table.y}" fill="${palette.header}"/>
+      <line x1="${table.x}" y1="${table.y + HEADER_H}" x2="${table.x + CARD_W}" y2="${table.y + HEADER_H}" stroke="${palette.border}" stroke-width="1.4"/>
+      <text x="${table.x + CARD_W / 2}" y="${table.y + 31}" text-anchor="middle" class="title-text">${table.title}</text>
+      ${rows}
     </g>
   `;
 }
 
-function diamond(cx, cy, label, width = 132, height = 74) {
-  const points = [
-    `${cx},${cy - height / 2}`,
-    `${cx + width / 2},${cy}`,
-    `${cx},${cy + height / 2}`,
-    `${cx - width / 2},${cy}`,
-  ].join(" ");
+function relationPath(d) {
+  return `<path d="${d}" class="relation-line"/>`;
+}
+
+function diamond(cx, cy, label, width = 150) {
+  const half = width / 2;
   return `
     <g>
-      <polygon points="${points}" fill="${colors.blue}" stroke="${colors.blueDark}" stroke-width="3"/>
-      <text x="${cx}" y="${cy + 5}" text-anchor="middle" class="relationship-label">${label}</text>
+      <polygon points="${cx},${cy - 34} ${cx + half},${cy} ${cx},${cy + 34} ${cx - half},${cy}"
+        fill="${palette.blue}" stroke="${palette.blueDeep}" stroke-width="2"/>
+      <text x="${cx}" y="${cy + 4}" text-anchor="middle" class="relation-text">${label}</text>
     </g>
   `;
 }
 
-function line(x1, y1, x2, y2) {
-  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="relation-line"/>`;
-}
-
-function polyline(points) {
-  return `<polyline points="${points.map(([x, y]) => `${x},${y}`).join(" ")}" class="relation-line" fill="none"/>`;
-}
-
-function oneMarker(x, y, orientation = "horizontal") {
-  if (orientation === "horizontal") {
-    return `
-      <line x1="${x - 8}" y1="${y - 12}" x2="${x - 8}" y2="${y + 12}" class="cardinality"/>
-      <line x1="${x + 2}" y1="${y - 12}" x2="${x + 2}" y2="${y + 12}" class="cardinality"/>
-    `;
-  }
+function cardinality(x, y, label) {
+  const width = label === "1" ? 32 : 58;
   return `
-    <line x1="${x - 12}" y1="${y - 8}" x2="${x + 12}" y2="${y - 8}" class="cardinality"/>
-    <line x1="${x - 12}" y1="${y + 2}" x2="${x + 12}" y2="${y + 2}" class="cardinality"/>
+    <g>
+      <rect x="${x - width / 2}" y="${y - 15}" width="${width}" height="30" rx="15"
+        fill="${palette.blueSoft}" stroke="${palette.blue}" stroke-width="1.5"/>
+      <text x="${x}" y="${y + 5}" text-anchor="middle" class="cardinality-text">${label}</text>
+    </g>
   `;
 }
 
-function manyMarker(x, y, orientation = "horizontal", optional = true) {
-  if (orientation === "horizontal") {
-    return `
-      ${optional ? `<circle cx="${x - 13}" cy="${y}" r="7" fill="${colors.canvas}" class="cardinality"/>` : ""}
-      <line x1="${x}" y1="${y}" x2="${x + 18}" y2="${y - 13}" class="cardinality"/>
-      <line x1="${x}" y1="${y}" x2="${x + 18}" y2="${y}" class="cardinality"/>
-      <line x1="${x}" y1="${y}" x2="${x + 18}" y2="${y + 13}" class="cardinality"/>
-    `;
-  }
-  return `
-    ${optional ? `<circle cx="${x}" cy="${y - 13}" r="7" fill="${colors.canvas}" class="cardinality"/>` : ""}
-    <line x1="${x}" y1="${y}" x2="${x - 13}" y2="${y + 18}" class="cardinality"/>
-    <line x1="${x}" y1="${y}" x2="${x}" y2="${y + 18}" class="cardinality"/>
-    <line x1="${x}" y1="${y}" x2="${x + 13}" y2="${y + 18}" class="cardinality"/>
-  `;
-}
+const wordBottom = tables[0].y + cardHeight(tables[0]);
+const userBottom = tables[1].y + cardHeight(tables[1]);
+const statusTop = tables[3].y;
+const postTop = tables[4].y;
+const commentTop = tables[5].y;
 
-const wordBottom = 70 + tableHeight(tables[0]);
-const userBottom = 70 + tableHeight(tables[1]);
-const statusTop = 650;
-const postTop = 820;
-const commentTop = 690;
+const relations = `
+  <!-- WORD -> USER_WORD_STATUS -->
+  ${relationPath(`M 270 ${wordBottom} V 546`)}
+  ${diamond(270, 580, "RECORDED IN", 156)}
+  ${relationPath(`M 270 614 V ${statusTop}`)}
+  ${cardinality(270, wordBottom + 24, "1")}
+  ${cardinality(270, statusTop - 24, "0..N")}
 
-const relationships = `
-  <!-- WORD 1 to USER_WORD_STATUS 0..N -->
-  ${line(260, wordBottom, 260, 534)}
-  ${diamond(260, 570, "RECORDED IN", 142, 72)}
-  ${line(260, 606, 260, statusTop)}
-  ${oneMarker(260, wordBottom + 18, "vertical")}
-  ${manyMarker(260, statusTop - 18, "vertical", true)}
+  <!-- APP_USER -> USER_WORD_STATUS -->
+  ${relationPath("M 785 220 L 700 400 L 605 534")}
+  ${diamond(605, 568, "TRACKS", 126)}
+  ${relationPath("M 605 602 L 485 790")}
+  ${cardinality(770, 245, "1")}
+  ${cardinality(530, 720, "0..N")}
 
-  <!-- APP_USER 1 to USER_WORD_STATUS 0..N -->
-  ${line(760, 278, 624, 556)}
-  ${diamond(570, 584, "TRACKS", 118, 68)}
-  ${line(530, 614, 450, 790)}
-  ${oneMarker(744, 302, "horizontal")}
-  ${manyMarker(466, 756, "horizontal", true)}
+  <!-- APP_USER -> GRAMMAR_NOTE -->
+  ${relationPath("M 1215 170 H 1280")}
+  ${diamond(1365, 170, "USER GRAMMAR", 172)}
+  ${relationPath("M 1451 170 H 1515")}
+  ${cardinality(1244, 170, "1")}
+  ${cardinality(1482, 170, "0..N")}
 
-  <!-- APP_USER 1 to COMMUNITY_POST 0..N -->
-  ${line(960, userBottom, 960, 590)}
-  ${diamond(960, 640, "WRITES", 118, 68)}
-  ${line(960, 674, 960, postTop)}
-  ${oneMarker(960, userBottom + 20, "vertical")}
-  ${manyMarker(960, postTop - 18, "vertical", true)}
+  <!-- APP_USER -> COMMUNITY_POST -->
+  ${relationPath(`M 1000 ${userBottom} V 586`)}
+  ${diamond(1000, 620, "WRITES", 128)}
+  ${relationPath(`M 1000 654 V ${postTop}`)}
+  ${cardinality(1000, userBottom + 28, "1")}
+  ${cardinality(1000, postTop - 26, "0..N")}
 
-  <!-- APP_USER 1 to COMMUNITY_COMMENT 0..N -->
-  ${line(1160, 262, 1311, 478)}
-  ${diamond(1370, 478, "WRITES", 118, 68)}
-  ${line(1429, 478, 1510, commentTop)}
-  ${oneMarker(1174, 280, "horizontal")}
-  ${manyMarker(1498, commentTop - 20, "horizontal", true)}
+  <!-- APP_USER -> COMMUNITY_COMMENT -->
+  ${relationPath("M 1215 258 L 1305 390 L 1390 466")}
+  ${diamond(1390, 500, "WRITES", 128)}
+  ${relationPath(`M 1390 534 L 1515 ${commentTop}`)}
+  ${cardinality(1232, 284, "1")}
+  ${cardinality(1502, commentTop - 28, "0..N")}
 
-  <!-- COMMUNITY_POST 1 to COMMUNITY_COMMENT 0..N -->
-  ${line(1160, 950, 1268, 950)}
-  ${diamond(1320, 950, "CONTAINS", 132, 72)}
-  ${line(1386, 950, 1460, 950)}
-  ${oneMarker(1178, 950, "horizontal")}
-  ${manyMarker(1442, 950, "horizontal", true)}
+  <!-- COMMUNITY_POST -> COMMUNITY_COMMENT -->
+  ${relationPath("M 1215 1008 H 1291")}
+  ${diamond(1365, 1008, "CONTAINS", 148)}
+  ${relationPath("M 1439 1008 H 1515")}
+  ${cardinality(1248, 1008, "1")}
+  ${cardinality(1482, 1008, "0..N")}
 
-  <!-- COMMUNITY_COMMENT optional parent to many replies -->
-  <path d="M 1860 840 C 1910 840, 1910 1060, 1860 1060" class="relation-line" fill="none"/>
-  ${manyMarker(1844, 840, "horizontal", true)}
-  ${manyMarker(1844, 1060, "horizontal", true)}
-  <text x="1880" y="956" text-anchor="middle" class="loop-label" transform="rotate(90 1880 956)">PARENT / REPLIES</text>
+  <!-- COMMENT self-reference -->
+  ${relationPath("M 1945 856 C 1980 856 1980 1050 1945 1050")}
+  ${cardinality(1962, 856, "0..1")}
+  ${cardinality(1962, 1050, "0..N")}
+  <text x="1980" y="953" text-anchor="middle" class="loop-text" transform="rotate(90 1980 953)">PARENT / REPLIES</text>
 `;
 
 const svg = `<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
+<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
   <defs>
-    <filter id="tableShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.10"/>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#000000" flood-opacity="0.08"/>
     </filter>
     <style>
-      text {
-        font-family: Inter, "Segoe UI", Arial, sans-serif;
-        fill: ${colors.ink};
-      }
-      .table-border { stroke: ${colors.ink}; stroke-width: 2.5; }
-      .cell-line { stroke: ${colors.ink}; stroke-width: 1.5; }
-      .table-title { font-size: 17px; font-weight: 700; letter-spacing: 0.8px; }
-      .key { font-size: 13px; font-weight: 700; }
-      .column { font-size: 13px; font-weight: 650; letter-spacing: 0.15px; }
-      .type { font-size: 12px; fill: ${colors.muted}; }
-      .relation-line { stroke: ${colors.blue}; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-      .cardinality { stroke: ${colors.blueDark}; stroke-width: 2.2; stroke-linecap: round; }
-      .relationship-label { fill: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
-      .loop-label { fill: ${colors.blueDark}; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; }
+      text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Arial, sans-serif; fill: ${palette.ink}; }
+      .rule { stroke: ${palette.rule}; stroke-width: 1; }
+      .title-text { font-size: 17px; font-weight: 700; letter-spacing: 0.8px; }
+      .key-text { font-size: 12px; font-weight: 700; }
+      .name-text { font-size: 12px; font-weight: 650; letter-spacing: 0.15px; }
+      .type-text { font-size: 11px; font-weight: 450; fill: ${palette.secondary}; }
+      .relation-line { fill: none; stroke: ${palette.blue}; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      .relation-text { fill: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 0.35px; }
+      .cardinality-text { fill: ${palette.blueDeep}; font-size: 11px; font-weight: 700; }
+      .loop-text { fill: ${palette.blueDeep}; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; }
     </style>
   </defs>
-
-  <rect width="${WIDTH}" height="${HEIGHT}" fill="${colors.canvas}"/>
-  ${relationships}
-  ${tables.map(tableSvg).join("")}
+  <rect width="${W}" height="${H}" fill="${palette.canvas}"/>
+  ${relations}
+  ${tables.map(table).join("")}
 </svg>`;
 
 const outputDir = path.resolve("docs/images");
 fs.mkdirSync(outputDir, { recursive: true });
-
-const svgPath = path.join(outputDir, "jlptcloud-erd.svg");
-
-fs.writeFileSync(svgPath, svg, "utf8");
-
-console.log(`Generated ${svgPath}`);
+fs.writeFileSync(path.join(outputDir, "jlptcloud-erd.svg"), svg, "utf8");
+console.log(`Generated ${path.join(outputDir, "jlptcloud-erd.svg")}`);

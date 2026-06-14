@@ -1,632 +1,679 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1320" viewBox="0 0 1920 1320">
+<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="1320" viewBox="0 0 2000 1320">
   <defs>
-    <filter id="tableShadow" x="-10%" y="-10%" width="120%" height="120%">
-      <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.10"/>
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="125%">
+      <feDropShadow dx="0" dy="5" stdDeviation="10" flood-color="#000000" flood-opacity="0.08"/>
     </filter>
     <style>
-      text {
-        font-family: Inter, "Segoe UI", Arial, sans-serif;
-        fill: #161616;
-      }
-      .table-border { stroke: #161616; stroke-width: 2.5; }
-      .cell-line { stroke: #161616; stroke-width: 1.5; }
-      .table-title { font-size: 17px; font-weight: 700; letter-spacing: 0.8px; }
-      .key { font-size: 13px; font-weight: 700; }
-      .column { font-size: 13px; font-weight: 650; letter-spacing: 0.15px; }
-      .type { font-size: 12px; fill: #525252; }
-      .relation-line { stroke: #0043CE; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-      .cardinality { stroke: #002D9C; stroke-width: 2.2; stroke-linecap: round; }
-      .relationship-label { fill: #FFFFFF; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
-      .loop-label { fill: #002D9C; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; }
+      text { font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Arial, sans-serif; fill: #1D1D1F; }
+      .rule { stroke: #D2D2D7; stroke-width: 1; }
+      .title-text { font-size: 17px; font-weight: 700; letter-spacing: 0.8px; }
+      .key-text { font-size: 12px; font-weight: 700; }
+      .name-text { font-size: 12px; font-weight: 650; letter-spacing: 0.15px; }
+      .type-text { font-size: 11px; font-weight: 450; fill: #6E6E73; }
+      .relation-line { fill: none; stroke: #007AFF; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
+      .relation-text { fill: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 0.35px; }
+      .cardinality-text { fill: #0055B3; font-size: 11px; font-weight: 700; }
+      .loop-text { fill: #0055B3; font-size: 11px; font-weight: 700; letter-spacing: 0.8px; }
     </style>
   </defs>
-
-  <rect width="1920" height="1320" fill="#FFFFFF"/>
+  <rect width="2000" height="1320" fill="#F5F5F7"/>
   
-  <!-- WORD 1 to USER_WORD_STATUS 0..N -->
-  <line x1="260" y1="492" x2="260" y2="534" class="relation-line"/>
-  
-    <g>
-      <polygon points="260,534 331,570 260,606 189,570" fill="#0043CE" stroke="#002D9C" stroke-width="3"/>
-      <text x="260" y="575" text-anchor="middle" class="relationship-label">RECORDED IN</text>
-    </g>
-  
-  <line x1="260" y1="606" x2="260" y2="650" class="relation-line"/>
-  
-    <line x1="248" y1="502" x2="272" y2="502" class="cardinality"/>
-    <line x1="248" y1="512" x2="272" y2="512" class="cardinality"/>
-  
-  
-    <circle cx="260" cy="619" r="7" fill="#FFFFFF" class="cardinality"/>
-    <line x1="260" y1="632" x2="247" y2="650" class="cardinality"/>
-    <line x1="260" y1="632" x2="260" y2="650" class="cardinality"/>
-    <line x1="260" y1="632" x2="273" y2="650" class="cardinality"/>
-  
-
-  <!-- APP_USER 1 to USER_WORD_STATUS 0..N -->
-  <line x1="760" y1="278" x2="624" y2="556" class="relation-line"/>
+  <!-- WORD -> USER_WORD_STATUS -->
+  <path d="M 270 478 V 546" class="relation-line"/>
   
     <g>
-      <polygon points="570,550 629,584 570,618 511,584" fill="#0043CE" stroke="#002D9C" stroke-width="3"/>
-      <text x="570" y="589" text-anchor="middle" class="relationship-label">TRACKS</text>
+      <polygon points="270,546 348,580 270,614 192,580"
+        fill="#007AFF" stroke="#0055B3" stroke-width="2"/>
+      <text x="270" y="584" text-anchor="middle" class="relation-text">RECORDED IN</text>
     </g>
   
-  <line x1="530" y1="614" x2="450" y2="790" class="relation-line"/>
-  
-      <line x1="736" y1="290" x2="736" y2="314" class="cardinality"/>
-      <line x1="746" y1="290" x2="746" y2="314" class="cardinality"/>
-    
-  
-      <circle cx="453" cy="756" r="7" fill="#FFFFFF" class="cardinality"/>
-      <line x1="466" y1="756" x2="484" y2="743" class="cardinality"/>
-      <line x1="466" y1="756" x2="484" y2="756" class="cardinality"/>
-      <line x1="466" y1="756" x2="484" y2="769" class="cardinality"/>
-    
-
-  <!-- APP_USER 1 to COMMUNITY_POST 0..N -->
-  <line x1="960" y1="302" x2="960" y2="590" class="relation-line"/>
+  <path d="M 270 614 V 680" class="relation-line"/>
   
     <g>
-      <polygon points="960,606 1019,640 960,674 901,640" fill="#0043CE" stroke="#002D9C" stroke-width="3"/>
-      <text x="960" y="645" text-anchor="middle" class="relationship-label">WRITES</text>
+      <rect x="254" y="487" width="32" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="270" y="507" text-anchor="middle" class="cardinality-text">1</text>
     </g>
   
-  <line x1="960" y1="674" x2="960" y2="820" class="relation-line"/>
-  
-    <line x1="948" y1="314" x2="972" y2="314" class="cardinality"/>
-    <line x1="948" y1="324" x2="972" y2="324" class="cardinality"/>
-  
-  
-    <circle cx="960" cy="789" r="7" fill="#FFFFFF" class="cardinality"/>
-    <line x1="960" y1="802" x2="947" y2="820" class="cardinality"/>
-    <line x1="960" y1="802" x2="960" y2="820" class="cardinality"/>
-    <line x1="960" y1="802" x2="973" y2="820" class="cardinality"/>
-  
-
-  <!-- APP_USER 1 to COMMUNITY_COMMENT 0..N -->
-  <line x1="1160" y1="262" x2="1311" y2="478" class="relation-line"/>
   
     <g>
-      <polygon points="1370,444 1429,478 1370,512 1311,478" fill="#0043CE" stroke="#002D9C" stroke-width="3"/>
-      <text x="1370" y="483" text-anchor="middle" class="relationship-label">WRITES</text>
+      <rect x="241" y="641" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="270" y="661" text-anchor="middle" class="cardinality-text">0..N</text>
     </g>
   
-  <line x1="1429" y1="478" x2="1510" y2="690" class="relation-line"/>
-  
-      <line x1="1166" y1="268" x2="1166" y2="292" class="cardinality"/>
-      <line x1="1176" y1="268" x2="1176" y2="292" class="cardinality"/>
-    
-  
-      <circle cx="1485" cy="670" r="7" fill="#FFFFFF" class="cardinality"/>
-      <line x1="1498" y1="670" x2="1516" y2="657" class="cardinality"/>
-      <line x1="1498" y1="670" x2="1516" y2="670" class="cardinality"/>
-      <line x1="1498" y1="670" x2="1516" y2="683" class="cardinality"/>
-    
 
-  <!-- COMMUNITY_POST 1 to COMMUNITY_COMMENT 0..N -->
-  <line x1="1160" y1="950" x2="1268" y2="950" class="relation-line"/>
+  <!-- APP_USER -> USER_WORD_STATUS -->
+  <path d="M 785 220 L 700 400 L 605 534" class="relation-line"/>
   
     <g>
-      <polygon points="1320,914 1386,950 1320,986 1254,950" fill="#0043CE" stroke="#002D9C" stroke-width="3"/>
-      <text x="1320" y="955" text-anchor="middle" class="relationship-label">CONTAINS</text>
+      <polygon points="605,534 668,568 605,602 542,568"
+        fill="#007AFF" stroke="#0055B3" stroke-width="2"/>
+      <text x="605" y="572" text-anchor="middle" class="relation-text">TRACKS</text>
     </g>
   
-  <line x1="1386" y1="950" x2="1460" y2="950" class="relation-line"/>
+  <path d="M 605 602 L 485 790" class="relation-line"/>
   
-      <line x1="1170" y1="938" x2="1170" y2="962" class="cardinality"/>
-      <line x1="1180" y1="938" x2="1180" y2="962" class="cardinality"/>
-    
+    <g>
+      <rect x="754" y="230" width="32" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="770" y="250" text-anchor="middle" class="cardinality-text">1</text>
+    </g>
   
-      <circle cx="1429" cy="950" r="7" fill="#FFFFFF" class="cardinality"/>
-      <line x1="1442" y1="950" x2="1460" y2="937" class="cardinality"/>
-      <line x1="1442" y1="950" x2="1460" y2="950" class="cardinality"/>
-      <line x1="1442" y1="950" x2="1460" y2="963" class="cardinality"/>
-    
+  
+    <g>
+      <rect x="501" y="705" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="530" y="725" text-anchor="middle" class="cardinality-text">0..N</text>
+    </g>
+  
 
-  <!-- COMMUNITY_COMMENT optional parent to many replies -->
-  <path d="M 1860 840 C 1910 840, 1910 1060, 1860 1060" class="relation-line" fill="none"/>
+  <!-- APP_USER -> GRAMMAR_NOTE -->
+  <path d="M 1215 170 H 1280" class="relation-line"/>
   
-      <circle cx="1831" cy="840" r="7" fill="#FFFFFF" class="cardinality"/>
-      <line x1="1844" y1="840" x2="1862" y2="827" class="cardinality"/>
-      <line x1="1844" y1="840" x2="1862" y2="840" class="cardinality"/>
-      <line x1="1844" y1="840" x2="1862" y2="853" class="cardinality"/>
-    
+    <g>
+      <polygon points="1365,136 1451,170 1365,204 1279,170"
+        fill="#007AFF" stroke="#0055B3" stroke-width="2"/>
+      <text x="1365" y="174" text-anchor="middle" class="relation-text">USER GRAMMAR</text>
+    </g>
   
-      <circle cx="1831" cy="1060" r="7" fill="#FFFFFF" class="cardinality"/>
-      <line x1="1844" y1="1060" x2="1862" y2="1047" class="cardinality"/>
-      <line x1="1844" y1="1060" x2="1862" y2="1060" class="cardinality"/>
-      <line x1="1844" y1="1060" x2="1862" y2="1073" class="cardinality"/>
-    
-  <text x="1880" y="956" text-anchor="middle" class="loop-label" transform="rotate(90 1880 956)">PARENT / REPLIES</text>
+  <path d="M 1451 170 H 1515" class="relation-line"/>
+  
+    <g>
+      <rect x="1228" y="155" width="32" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1244" y="175" text-anchor="middle" class="cardinality-text">1</text>
+    </g>
+  
+  
+    <g>
+      <rect x="1453" y="155" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1482" y="175" text-anchor="middle" class="cardinality-text">0..N</text>
+    </g>
+  
+
+  <!-- APP_USER -> COMMUNITY_POST -->
+  <path d="M 1000 293 V 586" class="relation-line"/>
+  
+    <g>
+      <polygon points="1000,586 1064,620 1000,654 936,620"
+        fill="#007AFF" stroke="#0055B3" stroke-width="2"/>
+      <text x="1000" y="624" text-anchor="middle" class="relation-text">WRITES</text>
+    </g>
+  
+  <path d="M 1000 654 V 880" class="relation-line"/>
+  
+    <g>
+      <rect x="984" y="306" width="32" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1000" y="326" text-anchor="middle" class="cardinality-text">1</text>
+    </g>
+  
+  
+    <g>
+      <rect x="971" y="839" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1000" y="859" text-anchor="middle" class="cardinality-text">0..N</text>
+    </g>
+  
+
+  <!-- APP_USER -> COMMUNITY_COMMENT -->
+  <path d="M 1215 258 L 1305 390 L 1390 466" class="relation-line"/>
+  
+    <g>
+      <polygon points="1390,466 1454,500 1390,534 1326,500"
+        fill="#007AFF" stroke="#0055B3" stroke-width="2"/>
+      <text x="1390" y="504" text-anchor="middle" class="relation-text">WRITES</text>
+    </g>
+  
+  <path d="M 1390 534 L 1515 760" class="relation-line"/>
+  
+    <g>
+      <rect x="1216" y="269" width="32" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1232" y="289" text-anchor="middle" class="cardinality-text">1</text>
+    </g>
+  
+  
+    <g>
+      <rect x="1473" y="717" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1502" y="737" text-anchor="middle" class="cardinality-text">0..N</text>
+    </g>
+  
+
+  <!-- COMMUNITY_POST -> COMMUNITY_COMMENT -->
+  <path d="M 1215 1008 H 1291" class="relation-line"/>
+  
+    <g>
+      <polygon points="1365,974 1439,1008 1365,1042 1291,1008"
+        fill="#007AFF" stroke="#0055B3" stroke-width="2"/>
+      <text x="1365" y="1012" text-anchor="middle" class="relation-text">CONTAINS</text>
+    </g>
+  
+  <path d="M 1439 1008 H 1515" class="relation-line"/>
+  
+    <g>
+      <rect x="1232" y="993" width="32" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1248" y="1013" text-anchor="middle" class="cardinality-text">1</text>
+    </g>
+  
+  
+    <g>
+      <rect x="1453" y="993" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1482" y="1013" text-anchor="middle" class="cardinality-text">0..N</text>
+    </g>
+  
+
+  <!-- COMMENT self-reference -->
+  <path d="M 1945 856 C 1980 856 1980 1050 1945 1050" class="relation-line"/>
+  
+    <g>
+      <rect x="1933" y="841" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1962" y="861" text-anchor="middle" class="cardinality-text">0..1</text>
+    </g>
+  
+  
+    <g>
+      <rect x="1933" y="1035" width="58" height="30" rx="15"
+        fill="#EAF3FF" stroke="#007AFF" stroke-width="1.5"/>
+      <text x="1962" y="1055" text-anchor="middle" class="cardinality-text">0..N</text>
+    </g>
+  
+  <text x="1980" y="953" text-anchor="middle" class="loop-text" transform="rotate(90 1980 953)">PARENT / REPLIES</text>
 
   
-    <g id="word" filter="url(#tableShadow)">
-      <rect x="60" y="70" width="400" height="422" rx="2" fill="#FFFFFF" class="table-border"/>
-      <rect x="60" y="70" width="400" height="42" rx="2" fill="#A8A8A8"/>
-      <line x1="60" y1="112" x2="460" y2="112" class="table-border"/>
-      <text x="260" y="97" text-anchor="middle" class="table-title">WORD</text>
+    <g filter="url(#cardShadow)">
+      <rect x="55" y="60" width="430" height="418" rx="12" fill="#FFFFFF" stroke="#C7C7CC" stroke-width="1.4"/>
+      <path d="M 67 60 H 473 Q 485 60 485 72 V 108 H 55 V 72 Q 55 60 67 60" fill="#E8E8ED"/>
+      <line x1="55" y1="108" x2="485" y2="108" stroke="#C7C7CC" stroke-width="1.4"/>
+      <text x="270" y="91" text-anchor="middle" class="title-text">WORD</text>
       
-        <rect x="60" y="112" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="116" y1="112" x2="116" y2="150" class="cell-line"/>
-        <line x1="302" y1="112" x2="302" y2="150" class="cell-line"/>
-        <line x1="60" y1="150" x2="460" y2="150" class="cell-line"/>
-        <text x="88" y="136" text-anchor="middle" class="key">PK</text>
-        <text x="132" y="136" class="column">ID</text>
-        <text x="318" y="136" class="type">BIGINT</text>
+      <rect x="55" y="108" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="113" y1="108" x2="113" y2="145" class="rule"/>
+      <line x1="319" y1="108" x2="319" y2="145" class="rule"/>
+      <line x1="55" y1="145" x2="485" y2="145" class="rule"/>
+      <text x="84" y="132" text-anchor="middle" class="key-text">PK</text>
+      <text x="129" y="132" class="name-text">ID</text>
+      <text x="335" y="132" class="type-text">BIGINT</text>
+    
+      <rect x="55" y="145" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="145" x2="113" y2="182" class="rule"/>
+      <line x1="319" y1="145" x2="319" y2="182" class="rule"/>
+      <line x1="55" y1="182" x2="485" y2="182" class="rule"/>
+      <text x="84" y="169" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="169" class="name-text">JAPANESE</text>
+      <text x="335" y="169" class="type-text">VARCHAR(100)</text>
+    
+      <rect x="55" y="182" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="182" x2="113" y2="219" class="rule"/>
+      <line x1="319" y1="182" x2="319" y2="219" class="rule"/>
+      <line x1="55" y1="219" x2="485" y2="219" class="rule"/>
+      <text x="84" y="206" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="206" class="name-text">READING</text>
+      <text x="335" y="206" class="type-text">VARCHAR(100)</text>
+    
+      <rect x="55" y="219" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="219" x2="113" y2="256" class="rule"/>
+      <line x1="319" y1="219" x2="319" y2="256" class="rule"/>
+      <line x1="55" y1="256" x2="485" y2="256" class="rule"/>
+      <text x="84" y="243" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="243" class="name-text">MEANING</text>
+      <text x="335" y="243" class="type-text">VARCHAR(150)</text>
+    
+      <rect x="55" y="256" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="256" x2="113" y2="293" class="rule"/>
+      <line x1="319" y1="256" x2="319" y2="293" class="rule"/>
+      <line x1="55" y1="293" x2="485" y2="293" class="rule"/>
+      <text x="84" y="280" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="280" class="name-text">PART_OF_SPEECH</text>
+      <text x="335" y="280" class="type-text">VARCHAR(50)</text>
+    
+      <rect x="55" y="293" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="293" x2="113" y2="330" class="rule"/>
+      <line x1="319" y1="293" x2="319" y2="330" class="rule"/>
+      <line x1="55" y1="330" x2="485" y2="330" class="rule"/>
+      <text x="84" y="317" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="317" class="name-text">EXAMPLE_SENTENCE</text>
+      <text x="335" y="317" class="type-text">VARCHAR(500)</text>
+    
+      <rect x="55" y="330" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="330" x2="113" y2="367" class="rule"/>
+      <line x1="319" y1="330" x2="319" y2="367" class="rule"/>
+      <line x1="55" y1="367" x2="485" y2="367" class="rule"/>
+      <text x="84" y="354" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="354" class="name-text">JLPT_LEVEL</text>
+      <text x="335" y="354" class="type-text">VARCHAR(10)</text>
+    
+      <rect x="55" y="367" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="367" x2="113" y2="404" class="rule"/>
+      <line x1="319" y1="367" x2="319" y2="404" class="rule"/>
+      <line x1="55" y1="404" x2="485" y2="404" class="rule"/>
+      <text x="84" y="391" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="391" class="name-text">STUDY_STATUS</text>
+      <text x="335" y="391" class="type-text">VARCHAR(20)</text>
+    
+      <rect x="55" y="404" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="404" x2="113" y2="441" class="rule"/>
+      <line x1="319" y1="404" x2="319" y2="441" class="rule"/>
+      <line x1="55" y1="441" x2="485" y2="441" class="rule"/>
+      <text x="84" y="428" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="428" class="name-text">CREATED_AT</text>
+      <text x="335" y="428" class="type-text">TIMESTAMP</text>
+    
+      <rect x="55" y="441" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="441" x2="113" y2="478" class="rule"/>
+      <line x1="319" y1="441" x2="319" y2="478" class="rule"/>
       
-        <rect x="60" y="150" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="150" x2="116" y2="188" class="cell-line"/>
-        <line x1="302" y1="150" x2="302" y2="188" class="cell-line"/>
-        <line x1="60" y1="188" x2="460" y2="188" class="cell-line"/>
-        <text x="88" y="174" text-anchor="middle" class="key"></text>
-        <text x="132" y="174" class="column">JAPANESE</text>
-        <text x="318" y="174" class="type">VARCHAR(100)</text>
-      
-        <rect x="60" y="188" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="188" x2="116" y2="226" class="cell-line"/>
-        <line x1="302" y1="188" x2="302" y2="226" class="cell-line"/>
-        <line x1="60" y1="226" x2="460" y2="226" class="cell-line"/>
-        <text x="88" y="212" text-anchor="middle" class="key"></text>
-        <text x="132" y="212" class="column">READING</text>
-        <text x="318" y="212" class="type">VARCHAR(100)</text>
-      
-        <rect x="60" y="226" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="226" x2="116" y2="264" class="cell-line"/>
-        <line x1="302" y1="226" x2="302" y2="264" class="cell-line"/>
-        <line x1="60" y1="264" x2="460" y2="264" class="cell-line"/>
-        <text x="88" y="250" text-anchor="middle" class="key"></text>
-        <text x="132" y="250" class="column">MEANING</text>
-        <text x="318" y="250" class="type">VARCHAR(150)</text>
-      
-        <rect x="60" y="264" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="264" x2="116" y2="302" class="cell-line"/>
-        <line x1="302" y1="264" x2="302" y2="302" class="cell-line"/>
-        <line x1="60" y1="302" x2="460" y2="302" class="cell-line"/>
-        <text x="88" y="288" text-anchor="middle" class="key"></text>
-        <text x="132" y="288" class="column">PART_OF_SPEECH</text>
-        <text x="318" y="288" class="type">VARCHAR(50)</text>
-      
-        <rect x="60" y="302" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="302" x2="116" y2="340" class="cell-line"/>
-        <line x1="302" y1="302" x2="302" y2="340" class="cell-line"/>
-        <line x1="60" y1="340" x2="460" y2="340" class="cell-line"/>
-        <text x="88" y="326" text-anchor="middle" class="key"></text>
-        <text x="132" y="326" class="column">EXAMPLE_SENTENCE</text>
-        <text x="318" y="326" class="type">VARCHAR(500)</text>
-      
-        <rect x="60" y="340" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="340" x2="116" y2="378" class="cell-line"/>
-        <line x1="302" y1="340" x2="302" y2="378" class="cell-line"/>
-        <line x1="60" y1="378" x2="460" y2="378" class="cell-line"/>
-        <text x="88" y="364" text-anchor="middle" class="key"></text>
-        <text x="132" y="364" class="column">JLPT_LEVEL</text>
-        <text x="318" y="364" class="type">VARCHAR(10)</text>
-      
-        <rect x="60" y="378" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="378" x2="116" y2="416" class="cell-line"/>
-        <line x1="302" y1="378" x2="302" y2="416" class="cell-line"/>
-        <line x1="60" y1="416" x2="460" y2="416" class="cell-line"/>
-        <text x="88" y="402" text-anchor="middle" class="key"></text>
-        <text x="132" y="402" class="column">STUDY_STATUS</text>
-        <text x="318" y="402" class="type">VARCHAR(20)</text>
-      
-        <rect x="60" y="416" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="416" x2="116" y2="454" class="cell-line"/>
-        <line x1="302" y1="416" x2="302" y2="454" class="cell-line"/>
-        <line x1="60" y1="454" x2="460" y2="454" class="cell-line"/>
-        <text x="88" y="440" text-anchor="middle" class="key"></text>
-        <text x="132" y="440" class="column">CREATED_AT</text>
-        <text x="318" y="440" class="type">TIMESTAMP</text>
-      
-        <rect x="60" y="454" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="454" x2="116" y2="492" class="cell-line"/>
-        <line x1="302" y1="454" x2="302" y2="492" class="cell-line"/>
-        <line x1="60" y1="492" x2="460" y2="492" class="cell-line"/>
-        <text x="88" y="478" text-anchor="middle" class="key"></text>
-        <text x="132" y="478" class="column">UPDATED_AT</text>
-        <text x="318" y="478" class="type">TIMESTAMP</text>
-      
+      <text x="84" y="465" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="465" class="name-text">UPDATED_AT</text>
+      <text x="335" y="465" class="type-text">TIMESTAMP</text>
+    
     </g>
   
-    <g id="user" filter="url(#tableShadow)">
-      <rect x="760" y="70" width="400" height="232" rx="2" fill="#FFFFFF" class="table-border"/>
-      <rect x="760" y="70" width="400" height="42" rx="2" fill="#A8A8A8"/>
-      <line x1="760" y1="112" x2="1160" y2="112" class="table-border"/>
-      <text x="960" y="97" text-anchor="middle" class="table-title">APP_USER</text>
+    <g filter="url(#cardShadow)">
+      <rect x="785" y="60" width="430" height="233" rx="12" fill="#FFFFFF" stroke="#C7C7CC" stroke-width="1.4"/>
+      <path d="M 797 60 H 1203 Q 1215 60 1215 72 V 108 H 785 V 72 Q 785 60 797 60" fill="#E8E8ED"/>
+      <line x1="785" y1="108" x2="1215" y2="108" stroke="#C7C7CC" stroke-width="1.4"/>
+      <text x="1000" y="91" text-anchor="middle" class="title-text">APP_USER</text>
       
-        <rect x="760" y="112" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="816" y1="112" x2="816" y2="150" class="cell-line"/>
-        <line x1="1002" y1="112" x2="1002" y2="150" class="cell-line"/>
-        <line x1="760" y1="150" x2="1160" y2="150" class="cell-line"/>
-        <text x="788" y="136" text-anchor="middle" class="key">PK</text>
-        <text x="832" y="136" class="column">ID</text>
-        <text x="1018" y="136" class="type">BIGINT</text>
+      <rect x="785" y="108" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="843" y1="108" x2="843" y2="145" class="rule"/>
+      <line x1="1049" y1="108" x2="1049" y2="145" class="rule"/>
+      <line x1="785" y1="145" x2="1215" y2="145" class="rule"/>
+      <text x="814" y="132" text-anchor="middle" class="key-text">PK</text>
+      <text x="859" y="132" class="name-text">ID</text>
+      <text x="1065" y="132" class="type-text">BIGINT</text>
+    
+      <rect x="785" y="145" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="843" y1="145" x2="843" y2="182" class="rule"/>
+      <line x1="1049" y1="145" x2="1049" y2="182" class="rule"/>
+      <line x1="785" y1="182" x2="1215" y2="182" class="rule"/>
+      <text x="814" y="169" text-anchor="middle" class="key-text">UK</text>
+      <text x="859" y="169" class="name-text">USERNAME</text>
+      <text x="1065" y="169" class="type-text">VARCHAR(50)</text>
+    
+      <rect x="785" y="182" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="182" x2="843" y2="219" class="rule"/>
+      <line x1="1049" y1="182" x2="1049" y2="219" class="rule"/>
+      <line x1="785" y1="219" x2="1215" y2="219" class="rule"/>
+      <text x="814" y="206" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="206" class="name-text">PASSWORD_HASH</text>
+      <text x="1065" y="206" class="type-text">VARCHAR(128)</text>
+    
+      <rect x="785" y="219" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="219" x2="843" y2="256" class="rule"/>
+      <line x1="1049" y1="219" x2="1049" y2="256" class="rule"/>
+      <line x1="785" y1="256" x2="1215" y2="256" class="rule"/>
+      <text x="814" y="243" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="243" class="name-text">CREATED_AT</text>
+      <text x="1065" y="243" class="type-text">TIMESTAMP</text>
+    
+      <rect x="785" y="256" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="256" x2="843" y2="293" class="rule"/>
+      <line x1="1049" y1="256" x2="1049" y2="293" class="rule"/>
       
-        <rect x="760" y="150" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="816" y1="150" x2="816" y2="188" class="cell-line"/>
-        <line x1="1002" y1="150" x2="1002" y2="188" class="cell-line"/>
-        <line x1="760" y1="188" x2="1160" y2="188" class="cell-line"/>
-        <text x="788" y="174" text-anchor="middle" class="key">UK</text>
-        <text x="832" y="174" class="column">USERNAME</text>
-        <text x="1018" y="174" class="type">VARCHAR(50)</text>
-      
-        <rect x="760" y="188" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="188" x2="816" y2="226" class="cell-line"/>
-        <line x1="1002" y1="188" x2="1002" y2="226" class="cell-line"/>
-        <line x1="760" y1="226" x2="1160" y2="226" class="cell-line"/>
-        <text x="788" y="212" text-anchor="middle" class="key"></text>
-        <text x="832" y="212" class="column">PASSWORD_HASH</text>
-        <text x="1018" y="212" class="type">VARCHAR(128)</text>
-      
-        <rect x="760" y="226" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="226" x2="816" y2="264" class="cell-line"/>
-        <line x1="1002" y1="226" x2="1002" y2="264" class="cell-line"/>
-        <line x1="760" y1="264" x2="1160" y2="264" class="cell-line"/>
-        <text x="788" y="250" text-anchor="middle" class="key"></text>
-        <text x="832" y="250" class="column">CREATED_AT</text>
-        <text x="1018" y="250" class="type">TIMESTAMP</text>
-      
-        <rect x="760" y="264" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="264" x2="816" y2="302" class="cell-line"/>
-        <line x1="1002" y1="264" x2="1002" y2="302" class="cell-line"/>
-        <line x1="760" y1="302" x2="1160" y2="302" class="cell-line"/>
-        <text x="788" y="288" text-anchor="middle" class="key"></text>
-        <text x="832" y="288" class="column">UPDATED_AT</text>
-        <text x="1018" y="288" class="type">TIMESTAMP</text>
-      
+      <text x="814" y="280" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="280" class="name-text">UPDATED_AT</text>
+      <text x="1065" y="280" class="type-text">TIMESTAMP</text>
+    
     </g>
   
-    <g id="grammar" filter="url(#tableShadow)">
-      <rect x="1460" y="70" width="400" height="422" rx="2" fill="#FFFFFF" class="table-border"/>
-      <rect x="1460" y="70" width="400" height="42" rx="2" fill="#A8A8A8"/>
-      <line x1="1460" y1="112" x2="1860" y2="112" class="table-border"/>
-      <text x="1660" y="97" text-anchor="middle" class="table-title">GRAMMAR_NOTE</text>
+    <g filter="url(#cardShadow)">
+      <rect x="1515" y="60" width="430" height="418" rx="12" fill="#FFFFFF" stroke="#C7C7CC" stroke-width="1.4"/>
+      <path d="M 1527 60 H 1933 Q 1945 60 1945 72 V 108 H 1515 V 72 Q 1515 60 1527 60" fill="#E8E8ED"/>
+      <line x1="1515" y1="108" x2="1945" y2="108" stroke="#C7C7CC" stroke-width="1.4"/>
+      <text x="1730" y="91" text-anchor="middle" class="title-text">GRAMMAR_NOTE</text>
       
-        <rect x="1460" y="112" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="1516" y1="112" x2="1516" y2="150" class="cell-line"/>
-        <line x1="1702" y1="112" x2="1702" y2="150" class="cell-line"/>
-        <line x1="1460" y1="150" x2="1860" y2="150" class="cell-line"/>
-        <text x="1488" y="136" text-anchor="middle" class="key">PK</text>
-        <text x="1532" y="136" class="column">ID</text>
-        <text x="1718" y="136" class="type">BIGINT</text>
+      <rect x="1515" y="108" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="1573" y1="108" x2="1573" y2="145" class="rule"/>
+      <line x1="1779" y1="108" x2="1779" y2="145" class="rule"/>
+      <line x1="1515" y1="145" x2="1945" y2="145" class="rule"/>
+      <text x="1544" y="132" text-anchor="middle" class="key-text">PK</text>
+      <text x="1589" y="132" class="name-text">ID</text>
+      <text x="1795" y="132" class="type-text">BIGINT</text>
+    
+      <rect x="1515" y="145" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="145" x2="1573" y2="182" class="rule"/>
+      <line x1="1779" y1="145" x2="1779" y2="182" class="rule"/>
+      <line x1="1515" y1="182" x2="1945" y2="182" class="rule"/>
+      <text x="1544" y="169" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="169" class="name-text">TITLE</text>
+      <text x="1795" y="169" class="type-text">VARCHAR(120)</text>
+    
+      <rect x="1515" y="182" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="182" x2="1573" y2="219" class="rule"/>
+      <line x1="1779" y1="182" x2="1779" y2="219" class="rule"/>
+      <line x1="1515" y1="219" x2="1945" y2="219" class="rule"/>
+      <text x="1544" y="206" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="206" class="name-text">PATTERN_EXPRESSION</text>
+      <text x="1795" y="206" class="type-text">VARCHAR(120)</text>
+    
+      <rect x="1515" y="219" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="219" x2="1573" y2="256" class="rule"/>
+      <line x1="1779" y1="219" x2="1779" y2="256" class="rule"/>
+      <line x1="1515" y1="256" x2="1945" y2="256" class="rule"/>
+      <text x="1544" y="243" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="243" class="name-text">MEANING</text>
+      <text x="1795" y="243" class="type-text">VARCHAR(200)</text>
+    
+      <rect x="1515" y="256" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="256" x2="1573" y2="293" class="rule"/>
+      <line x1="1779" y1="256" x2="1779" y2="293" class="rule"/>
+      <line x1="1515" y1="293" x2="1945" y2="293" class="rule"/>
+      <text x="1544" y="280" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="280" class="name-text">EXPLANATION</text>
+      <text x="1795" y="280" class="type-text">VARCHAR(1000)</text>
+    
+      <rect x="1515" y="293" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="293" x2="1573" y2="330" class="rule"/>
+      <line x1="1779" y1="293" x2="1779" y2="330" class="rule"/>
+      <line x1="1515" y1="330" x2="1945" y2="330" class="rule"/>
+      <text x="1544" y="317" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="317" class="name-text">EXAMPLE_SENTENCE</text>
+      <text x="1795" y="317" class="type-text">VARCHAR(500)</text>
+    
+      <rect x="1515" y="330" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="330" x2="1573" y2="367" class="rule"/>
+      <line x1="1779" y1="330" x2="1779" y2="367" class="rule"/>
+      <line x1="1515" y1="367" x2="1945" y2="367" class="rule"/>
+      <text x="1544" y="354" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="354" class="name-text">JLPT_LEVEL</text>
+      <text x="1795" y="354" class="type-text">VARCHAR(10)</text>
+    
+      <rect x="1515" y="367" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="367" x2="1573" y2="404" class="rule"/>
+      <line x1="1779" y1="367" x2="1779" y2="404" class="rule"/>
+      <line x1="1515" y1="404" x2="1945" y2="404" class="rule"/>
+      <text x="1544" y="391" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="391" class="name-text">STUDY_STATUS</text>
+      <text x="1795" y="391" class="type-text">VARCHAR(20)</text>
+    
+      <rect x="1515" y="404" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="404" x2="1573" y2="441" class="rule"/>
+      <line x1="1779" y1="404" x2="1779" y2="441" class="rule"/>
+      <line x1="1515" y1="441" x2="1945" y2="441" class="rule"/>
+      <text x="1544" y="428" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="428" class="name-text">CREATED_AT</text>
+      <text x="1795" y="428" class="type-text">TIMESTAMP</text>
+    
+      <rect x="1515" y="441" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="441" x2="1573" y2="478" class="rule"/>
+      <line x1="1779" y1="441" x2="1779" y2="478" class="rule"/>
       
-        <rect x="1460" y="150" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="150" x2="1516" y2="188" class="cell-line"/>
-        <line x1="1702" y1="150" x2="1702" y2="188" class="cell-line"/>
-        <line x1="1460" y1="188" x2="1860" y2="188" class="cell-line"/>
-        <text x="1488" y="174" text-anchor="middle" class="key"></text>
-        <text x="1532" y="174" class="column">TITLE</text>
-        <text x="1718" y="174" class="type">VARCHAR(120)</text>
-      
-        <rect x="1460" y="188" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="188" x2="1516" y2="226" class="cell-line"/>
-        <line x1="1702" y1="188" x2="1702" y2="226" class="cell-line"/>
-        <line x1="1460" y1="226" x2="1860" y2="226" class="cell-line"/>
-        <text x="1488" y="212" text-anchor="middle" class="key"></text>
-        <text x="1532" y="212" class="column">PATTERN_EXPRESSION</text>
-        <text x="1718" y="212" class="type">VARCHAR(120)</text>
-      
-        <rect x="1460" y="226" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="226" x2="1516" y2="264" class="cell-line"/>
-        <line x1="1702" y1="226" x2="1702" y2="264" class="cell-line"/>
-        <line x1="1460" y1="264" x2="1860" y2="264" class="cell-line"/>
-        <text x="1488" y="250" text-anchor="middle" class="key"></text>
-        <text x="1532" y="250" class="column">MEANING</text>
-        <text x="1718" y="250" class="type">VARCHAR(200)</text>
-      
-        <rect x="1460" y="264" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="264" x2="1516" y2="302" class="cell-line"/>
-        <line x1="1702" y1="264" x2="1702" y2="302" class="cell-line"/>
-        <line x1="1460" y1="302" x2="1860" y2="302" class="cell-line"/>
-        <text x="1488" y="288" text-anchor="middle" class="key"></text>
-        <text x="1532" y="288" class="column">EXPLANATION</text>
-        <text x="1718" y="288" class="type">VARCHAR(1000)</text>
-      
-        <rect x="1460" y="302" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="302" x2="1516" y2="340" class="cell-line"/>
-        <line x1="1702" y1="302" x2="1702" y2="340" class="cell-line"/>
-        <line x1="1460" y1="340" x2="1860" y2="340" class="cell-line"/>
-        <text x="1488" y="326" text-anchor="middle" class="key"></text>
-        <text x="1532" y="326" class="column">EXAMPLE_SENTENCE</text>
-        <text x="1718" y="326" class="type">VARCHAR(500)</text>
-      
-        <rect x="1460" y="340" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="340" x2="1516" y2="378" class="cell-line"/>
-        <line x1="1702" y1="340" x2="1702" y2="378" class="cell-line"/>
-        <line x1="1460" y1="378" x2="1860" y2="378" class="cell-line"/>
-        <text x="1488" y="364" text-anchor="middle" class="key"></text>
-        <text x="1532" y="364" class="column">JLPT_LEVEL</text>
-        <text x="1718" y="364" class="type">VARCHAR(10)</text>
-      
-        <rect x="1460" y="378" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="378" x2="1516" y2="416" class="cell-line"/>
-        <line x1="1702" y1="378" x2="1702" y2="416" class="cell-line"/>
-        <line x1="1460" y1="416" x2="1860" y2="416" class="cell-line"/>
-        <text x="1488" y="402" text-anchor="middle" class="key"></text>
-        <text x="1532" y="402" class="column">STUDY_STATUS</text>
-        <text x="1718" y="402" class="type">VARCHAR(20)</text>
-      
-        <rect x="1460" y="416" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="416" x2="1516" y2="454" class="cell-line"/>
-        <line x1="1702" y1="416" x2="1702" y2="454" class="cell-line"/>
-        <line x1="1460" y1="454" x2="1860" y2="454" class="cell-line"/>
-        <text x="1488" y="440" text-anchor="middle" class="key"></text>
-        <text x="1532" y="440" class="column">CREATED_AT</text>
-        <text x="1718" y="440" class="type">TIMESTAMP</text>
-      
-        <rect x="1460" y="454" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="454" x2="1516" y2="492" class="cell-line"/>
-        <line x1="1702" y1="454" x2="1702" y2="492" class="cell-line"/>
-        <line x1="1460" y1="492" x2="1860" y2="492" class="cell-line"/>
-        <text x="1488" y="478" text-anchor="middle" class="key"></text>
-        <text x="1532" y="478" class="column">UPDATED_AT</text>
-        <text x="1718" y="478" class="type">TIMESTAMP</text>
-      
+      <text x="1544" y="465" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="465" class="name-text">UPDATED_AT</text>
+      <text x="1795" y="465" class="type-text">TIMESTAMP</text>
+    
     </g>
   
-    <g id="status" filter="url(#tableShadow)">
-      <rect x="60" y="650" width="400" height="612" rx="2" fill="#FFFFFF" class="table-border"/>
-      <rect x="60" y="650" width="400" height="42" rx="2" fill="#A8A8A8"/>
-      <line x1="60" y1="692" x2="460" y2="692" class="table-border"/>
-      <text x="260" y="677" text-anchor="middle" class="table-title">USER_WORD_STATUS</text>
+    <g filter="url(#cardShadow)">
+      <rect x="55" y="680" width="430" height="603" rx="12" fill="#FFFFFF" stroke="#C7C7CC" stroke-width="1.4"/>
+      <path d="M 67 680 H 473 Q 485 680 485 692 V 728 H 55 V 692 Q 55 680 67 680" fill="#E8E8ED"/>
+      <line x1="55" y1="728" x2="485" y2="728" stroke="#C7C7CC" stroke-width="1.4"/>
+      <text x="270" y="711" text-anchor="middle" class="title-text">USER_WORD_STATUS</text>
       
-        <rect x="60" y="692" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="116" y1="692" x2="116" y2="730" class="cell-line"/>
-        <line x1="302" y1="692" x2="302" y2="730" class="cell-line"/>
-        <line x1="60" y1="730" x2="460" y2="730" class="cell-line"/>
-        <text x="88" y="716" text-anchor="middle" class="key">PK</text>
-        <text x="132" y="716" class="column">ID</text>
-        <text x="318" y="716" class="type">BIGINT</text>
+      <rect x="55" y="728" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="113" y1="728" x2="113" y2="765" class="rule"/>
+      <line x1="319" y1="728" x2="319" y2="765" class="rule"/>
+      <line x1="55" y1="765" x2="485" y2="765" class="rule"/>
+      <text x="84" y="752" text-anchor="middle" class="key-text">PK</text>
+      <text x="129" y="752" class="name-text">ID</text>
+      <text x="335" y="752" class="type-text">BIGINT</text>
+    
+      <rect x="55" y="765" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="113" y1="765" x2="113" y2="802" class="rule"/>
+      <line x1="319" y1="765" x2="319" y2="802" class="rule"/>
+      <line x1="55" y1="802" x2="485" y2="802" class="rule"/>
+      <text x="84" y="789" text-anchor="middle" class="key-text">FK</text>
+      <text x="129" y="789" class="name-text">USER_ID</text>
+      <text x="335" y="789" class="type-text">BIGINT</text>
+    
+      <rect x="55" y="802" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="113" y1="802" x2="113" y2="839" class="rule"/>
+      <line x1="319" y1="802" x2="319" y2="839" class="rule"/>
+      <line x1="55" y1="839" x2="485" y2="839" class="rule"/>
+      <text x="84" y="826" text-anchor="middle" class="key-text">FK</text>
+      <text x="129" y="826" class="name-text">WORD_ID</text>
+      <text x="335" y="826" class="type-text">BIGINT</text>
+    
+      <rect x="55" y="839" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="839" x2="113" y2="876" class="rule"/>
+      <line x1="319" y1="839" x2="319" y2="876" class="rule"/>
+      <line x1="55" y1="876" x2="485" y2="876" class="rule"/>
+      <text x="84" y="863" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="863" class="name-text">STUDY_STATUS</text>
+      <text x="335" y="863" class="type-text">VARCHAR(20)</text>
+    
+      <rect x="55" y="876" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="876" x2="113" y2="913" class="rule"/>
+      <line x1="319" y1="876" x2="319" y2="913" class="rule"/>
+      <line x1="55" y1="913" x2="485" y2="913" class="rule"/>
+      <text x="84" y="900" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="900" class="name-text">STUDIED</text>
+      <text x="335" y="900" class="type-text">BOOLEAN</text>
+    
+      <rect x="55" y="913" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="913" x2="113" y2="950" class="rule"/>
+      <line x1="319" y1="913" x2="319" y2="950" class="rule"/>
+      <line x1="55" y1="950" x2="485" y2="950" class="rule"/>
+      <text x="84" y="937" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="937" class="name-text">MEMORY_STAGE</text>
+      <text x="335" y="937" class="type-text">INTEGER</text>
+    
+      <rect x="55" y="950" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="950" x2="113" y2="987" class="rule"/>
+      <line x1="319" y1="950" x2="319" y2="987" class="rule"/>
+      <line x1="55" y1="987" x2="485" y2="987" class="rule"/>
+      <text x="84" y="974" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="974" class="name-text">MEMORY_SCORE</text>
+      <text x="335" y="974" class="type-text">DOUBLE PRECISION</text>
+    
+      <rect x="55" y="987" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="987" x2="113" y2="1024" class="rule"/>
+      <line x1="319" y1="987" x2="319" y2="1024" class="rule"/>
+      <line x1="55" y1="1024" x2="485" y2="1024" class="rule"/>
+      <text x="84" y="1011" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1011" class="name-text">CORRECT_STREAK</text>
+      <text x="335" y="1011" class="type-text">INTEGER</text>
+    
+      <rect x="55" y="1024" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="1024" x2="113" y2="1061" class="rule"/>
+      <line x1="319" y1="1024" x2="319" y2="1061" class="rule"/>
+      <line x1="55" y1="1061" x2="485" y2="1061" class="rule"/>
+      <text x="84" y="1048" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1048" class="name-text">CORRECT_COUNT</text>
+      <text x="335" y="1048" class="type-text">INTEGER</text>
+    
+      <rect x="55" y="1061" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="1061" x2="113" y2="1098" class="rule"/>
+      <line x1="319" y1="1061" x2="319" y2="1098" class="rule"/>
+      <line x1="55" y1="1098" x2="485" y2="1098" class="rule"/>
+      <text x="84" y="1085" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1085" class="name-text">WRONG_COUNT</text>
+      <text x="335" y="1085" class="type-text">INTEGER</text>
+    
+      <rect x="55" y="1098" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="1098" x2="113" y2="1135" class="rule"/>
+      <line x1="319" y1="1098" x2="319" y2="1135" class="rule"/>
+      <line x1="55" y1="1135" x2="485" y2="1135" class="rule"/>
+      <text x="84" y="1122" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1122" class="name-text">REVIEW_COUNT</text>
+      <text x="335" y="1122" class="type-text">INTEGER</text>
+    
+      <rect x="55" y="1135" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="1135" x2="113" y2="1172" class="rule"/>
+      <line x1="319" y1="1135" x2="319" y2="1172" class="rule"/>
+      <line x1="55" y1="1172" x2="485" y2="1172" class="rule"/>
+      <text x="84" y="1159" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1159" class="name-text">NEXT_REVIEW_AT</text>
+      <text x="335" y="1159" class="type-text">TIMESTAMP</text>
+    
+      <rect x="55" y="1172" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="1172" x2="113" y2="1209" class="rule"/>
+      <line x1="319" y1="1172" x2="319" y2="1209" class="rule"/>
+      <line x1="55" y1="1209" x2="485" y2="1209" class="rule"/>
+      <text x="84" y="1196" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1196" class="name-text">LAST_REVIEWED_AT</text>
+      <text x="335" y="1196" class="type-text">TIMESTAMP</text>
+    
+      <rect x="55" y="1209" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="1209" x2="113" y2="1246" class="rule"/>
+      <line x1="319" y1="1209" x2="319" y2="1246" class="rule"/>
+      <line x1="55" y1="1246" x2="485" y2="1246" class="rule"/>
+      <text x="84" y="1233" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1233" class="name-text">CREATED_AT</text>
+      <text x="335" y="1233" class="type-text">TIMESTAMP</text>
+    
+      <rect x="55" y="1246" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="113" y1="1246" x2="113" y2="1283" class="rule"/>
+      <line x1="319" y1="1246" x2="319" y2="1283" class="rule"/>
       
-        <rect x="60" y="730" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="116" y1="730" x2="116" y2="768" class="cell-line"/>
-        <line x1="302" y1="730" x2="302" y2="768" class="cell-line"/>
-        <line x1="60" y1="768" x2="460" y2="768" class="cell-line"/>
-        <text x="88" y="754" text-anchor="middle" class="key">FK</text>
-        <text x="132" y="754" class="column">USER_ID</text>
-        <text x="318" y="754" class="type">BIGINT</text>
-      
-        <rect x="60" y="768" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="116" y1="768" x2="116" y2="806" class="cell-line"/>
-        <line x1="302" y1="768" x2="302" y2="806" class="cell-line"/>
-        <line x1="60" y1="806" x2="460" y2="806" class="cell-line"/>
-        <text x="88" y="792" text-anchor="middle" class="key">FK</text>
-        <text x="132" y="792" class="column">WORD_ID</text>
-        <text x="318" y="792" class="type">BIGINT</text>
-      
-        <rect x="60" y="806" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="806" x2="116" y2="844" class="cell-line"/>
-        <line x1="302" y1="806" x2="302" y2="844" class="cell-line"/>
-        <line x1="60" y1="844" x2="460" y2="844" class="cell-line"/>
-        <text x="88" y="830" text-anchor="middle" class="key"></text>
-        <text x="132" y="830" class="column">STUDY_STATUS</text>
-        <text x="318" y="830" class="type">VARCHAR(20)</text>
-      
-        <rect x="60" y="844" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="844" x2="116" y2="882" class="cell-line"/>
-        <line x1="302" y1="844" x2="302" y2="882" class="cell-line"/>
-        <line x1="60" y1="882" x2="460" y2="882" class="cell-line"/>
-        <text x="88" y="868" text-anchor="middle" class="key"></text>
-        <text x="132" y="868" class="column">STUDIED</text>
-        <text x="318" y="868" class="type">BOOLEAN</text>
-      
-        <rect x="60" y="882" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="882" x2="116" y2="920" class="cell-line"/>
-        <line x1="302" y1="882" x2="302" y2="920" class="cell-line"/>
-        <line x1="60" y1="920" x2="460" y2="920" class="cell-line"/>
-        <text x="88" y="906" text-anchor="middle" class="key"></text>
-        <text x="132" y="906" class="column">MEMORY_STAGE</text>
-        <text x="318" y="906" class="type">INTEGER</text>
-      
-        <rect x="60" y="920" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="920" x2="116" y2="958" class="cell-line"/>
-        <line x1="302" y1="920" x2="302" y2="958" class="cell-line"/>
-        <line x1="60" y1="958" x2="460" y2="958" class="cell-line"/>
-        <text x="88" y="944" text-anchor="middle" class="key"></text>
-        <text x="132" y="944" class="column">MEMORY_SCORE</text>
-        <text x="318" y="944" class="type">DOUBLE PRECISION</text>
-      
-        <rect x="60" y="958" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="958" x2="116" y2="996" class="cell-line"/>
-        <line x1="302" y1="958" x2="302" y2="996" class="cell-line"/>
-        <line x1="60" y1="996" x2="460" y2="996" class="cell-line"/>
-        <text x="88" y="982" text-anchor="middle" class="key"></text>
-        <text x="132" y="982" class="column">CORRECT_STREAK</text>
-        <text x="318" y="982" class="type">INTEGER</text>
-      
-        <rect x="60" y="996" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="996" x2="116" y2="1034" class="cell-line"/>
-        <line x1="302" y1="996" x2="302" y2="1034" class="cell-line"/>
-        <line x1="60" y1="1034" x2="460" y2="1034" class="cell-line"/>
-        <text x="88" y="1020" text-anchor="middle" class="key"></text>
-        <text x="132" y="1020" class="column">CORRECT_COUNT</text>
-        <text x="318" y="1020" class="type">INTEGER</text>
-      
-        <rect x="60" y="1034" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="1034" x2="116" y2="1072" class="cell-line"/>
-        <line x1="302" y1="1034" x2="302" y2="1072" class="cell-line"/>
-        <line x1="60" y1="1072" x2="460" y2="1072" class="cell-line"/>
-        <text x="88" y="1058" text-anchor="middle" class="key"></text>
-        <text x="132" y="1058" class="column">WRONG_COUNT</text>
-        <text x="318" y="1058" class="type">INTEGER</text>
-      
-        <rect x="60" y="1072" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="1072" x2="116" y2="1110" class="cell-line"/>
-        <line x1="302" y1="1072" x2="302" y2="1110" class="cell-line"/>
-        <line x1="60" y1="1110" x2="460" y2="1110" class="cell-line"/>
-        <text x="88" y="1096" text-anchor="middle" class="key"></text>
-        <text x="132" y="1096" class="column">REVIEW_COUNT</text>
-        <text x="318" y="1096" class="type">INTEGER</text>
-      
-        <rect x="60" y="1110" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="1110" x2="116" y2="1148" class="cell-line"/>
-        <line x1="302" y1="1110" x2="302" y2="1148" class="cell-line"/>
-        <line x1="60" y1="1148" x2="460" y2="1148" class="cell-line"/>
-        <text x="88" y="1134" text-anchor="middle" class="key"></text>
-        <text x="132" y="1134" class="column">NEXT_REVIEW_AT</text>
-        <text x="318" y="1134" class="type">TIMESTAMP</text>
-      
-        <rect x="60" y="1148" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="1148" x2="116" y2="1186" class="cell-line"/>
-        <line x1="302" y1="1148" x2="302" y2="1186" class="cell-line"/>
-        <line x1="60" y1="1186" x2="460" y2="1186" class="cell-line"/>
-        <text x="88" y="1172" text-anchor="middle" class="key"></text>
-        <text x="132" y="1172" class="column">LAST_REVIEWED_AT</text>
-        <text x="318" y="1172" class="type">TIMESTAMP</text>
-      
-        <rect x="60" y="1186" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="1186" x2="116" y2="1224" class="cell-line"/>
-        <line x1="302" y1="1186" x2="302" y2="1224" class="cell-line"/>
-        <line x1="60" y1="1224" x2="460" y2="1224" class="cell-line"/>
-        <text x="88" y="1210" text-anchor="middle" class="key"></text>
-        <text x="132" y="1210" class="column">CREATED_AT</text>
-        <text x="318" y="1210" class="type">TIMESTAMP</text>
-      
-        <rect x="60" y="1224" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="116" y1="1224" x2="116" y2="1262" class="cell-line"/>
-        <line x1="302" y1="1224" x2="302" y2="1262" class="cell-line"/>
-        <line x1="60" y1="1262" x2="460" y2="1262" class="cell-line"/>
-        <text x="88" y="1248" text-anchor="middle" class="key"></text>
-        <text x="132" y="1248" class="column">UPDATED_AT</text>
-        <text x="318" y="1248" class="type">TIMESTAMP</text>
-      
+      <text x="84" y="1270" text-anchor="middle" class="key-text"></text>
+      <text x="129" y="1270" class="name-text">UPDATED_AT</text>
+      <text x="335" y="1270" class="type-text">TIMESTAMP</text>
+    
     </g>
   
-    <g id="post" filter="url(#tableShadow)">
-      <rect x="760" y="820" width="400" height="308" rx="2" fill="#FFFFFF" class="table-border"/>
-      <rect x="760" y="820" width="400" height="42" rx="2" fill="#A8A8A8"/>
-      <line x1="760" y1="862" x2="1160" y2="862" class="table-border"/>
-      <text x="960" y="847" text-anchor="middle" class="table-title">COMMUNITY_POST</text>
+    <g filter="url(#cardShadow)">
+      <rect x="785" y="880" width="430" height="307" rx="12" fill="#FFFFFF" stroke="#C7C7CC" stroke-width="1.4"/>
+      <path d="M 797 880 H 1203 Q 1215 880 1215 892 V 928 H 785 V 892 Q 785 880 797 880" fill="#E8E8ED"/>
+      <line x1="785" y1="928" x2="1215" y2="928" stroke="#C7C7CC" stroke-width="1.4"/>
+      <text x="1000" y="911" text-anchor="middle" class="title-text">COMMUNITY_POST</text>
       
-        <rect x="760" y="862" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="816" y1="862" x2="816" y2="900" class="cell-line"/>
-        <line x1="1002" y1="862" x2="1002" y2="900" class="cell-line"/>
-        <line x1="760" y1="900" x2="1160" y2="900" class="cell-line"/>
-        <text x="788" y="886" text-anchor="middle" class="key">PK</text>
-        <text x="832" y="886" class="column">ID</text>
-        <text x="1018" y="886" class="type">BIGINT</text>
+      <rect x="785" y="928" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="843" y1="928" x2="843" y2="965" class="rule"/>
+      <line x1="1049" y1="928" x2="1049" y2="965" class="rule"/>
+      <line x1="785" y1="965" x2="1215" y2="965" class="rule"/>
+      <text x="814" y="952" text-anchor="middle" class="key-text">PK</text>
+      <text x="859" y="952" class="name-text">ID</text>
+      <text x="1065" y="952" class="type-text">BIGINT</text>
+    
+      <rect x="785" y="965" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="843" y1="965" x2="843" y2="1002" class="rule"/>
+      <line x1="1049" y1="965" x2="1049" y2="1002" class="rule"/>
+      <line x1="785" y1="1002" x2="1215" y2="1002" class="rule"/>
+      <text x="814" y="989" text-anchor="middle" class="key-text">FK</text>
+      <text x="859" y="989" class="name-text">USER_ID</text>
+      <text x="1065" y="989" class="type-text">BIGINT</text>
+    
+      <rect x="785" y="1002" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="1002" x2="843" y2="1039" class="rule"/>
+      <line x1="1049" y1="1002" x2="1049" y2="1039" class="rule"/>
+      <line x1="785" y1="1039" x2="1215" y2="1039" class="rule"/>
+      <text x="814" y="1026" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="1026" class="name-text">AUTHOR_NAME</text>
+      <text x="1065" y="1026" class="type-text">VARCHAR(80)</text>
+    
+      <rect x="785" y="1039" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="1039" x2="843" y2="1076" class="rule"/>
+      <line x1="1049" y1="1039" x2="1049" y2="1076" class="rule"/>
+      <line x1="785" y1="1076" x2="1215" y2="1076" class="rule"/>
+      <text x="814" y="1063" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="1063" class="name-text">TITLE</text>
+      <text x="1065" y="1063" class="type-text">VARCHAR(120)</text>
+    
+      <rect x="785" y="1076" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="1076" x2="843" y2="1113" class="rule"/>
+      <line x1="1049" y1="1076" x2="1049" y2="1113" class="rule"/>
+      <line x1="785" y1="1113" x2="1215" y2="1113" class="rule"/>
+      <text x="814" y="1100" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="1100" class="name-text">CONTENT</text>
+      <text x="1065" y="1100" class="type-text">VARCHAR(3000)</text>
+    
+      <rect x="785" y="1113" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="1113" x2="843" y2="1150" class="rule"/>
+      <line x1="1049" y1="1113" x2="1049" y2="1150" class="rule"/>
+      <line x1="785" y1="1150" x2="1215" y2="1150" class="rule"/>
+      <text x="814" y="1137" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="1137" class="name-text">CREATED_AT</text>
+      <text x="1065" y="1137" class="type-text">TIMESTAMP</text>
+    
+      <rect x="785" y="1150" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="843" y1="1150" x2="843" y2="1187" class="rule"/>
+      <line x1="1049" y1="1150" x2="1049" y2="1187" class="rule"/>
       
-        <rect x="760" y="900" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="816" y1="900" x2="816" y2="938" class="cell-line"/>
-        <line x1="1002" y1="900" x2="1002" y2="938" class="cell-line"/>
-        <line x1="760" y1="938" x2="1160" y2="938" class="cell-line"/>
-        <text x="788" y="924" text-anchor="middle" class="key">FK</text>
-        <text x="832" y="924" class="column">USER_ID</text>
-        <text x="1018" y="924" class="type">BIGINT</text>
-      
-        <rect x="760" y="938" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="938" x2="816" y2="976" class="cell-line"/>
-        <line x1="1002" y1="938" x2="1002" y2="976" class="cell-line"/>
-        <line x1="760" y1="976" x2="1160" y2="976" class="cell-line"/>
-        <text x="788" y="962" text-anchor="middle" class="key"></text>
-        <text x="832" y="962" class="column">AUTHOR_NAME</text>
-        <text x="1018" y="962" class="type">VARCHAR(80)</text>
-      
-        <rect x="760" y="976" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="976" x2="816" y2="1014" class="cell-line"/>
-        <line x1="1002" y1="976" x2="1002" y2="1014" class="cell-line"/>
-        <line x1="760" y1="1014" x2="1160" y2="1014" class="cell-line"/>
-        <text x="788" y="1000" text-anchor="middle" class="key"></text>
-        <text x="832" y="1000" class="column">TITLE</text>
-        <text x="1018" y="1000" class="type">VARCHAR(120)</text>
-      
-        <rect x="760" y="1014" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="1014" x2="816" y2="1052" class="cell-line"/>
-        <line x1="1002" y1="1014" x2="1002" y2="1052" class="cell-line"/>
-        <line x1="760" y1="1052" x2="1160" y2="1052" class="cell-line"/>
-        <text x="788" y="1038" text-anchor="middle" class="key"></text>
-        <text x="832" y="1038" class="column">CONTENT</text>
-        <text x="1018" y="1038" class="type">VARCHAR(3000)</text>
-      
-        <rect x="760" y="1052" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="1052" x2="816" y2="1090" class="cell-line"/>
-        <line x1="1002" y1="1052" x2="1002" y2="1090" class="cell-line"/>
-        <line x1="760" y1="1090" x2="1160" y2="1090" class="cell-line"/>
-        <text x="788" y="1076" text-anchor="middle" class="key"></text>
-        <text x="832" y="1076" class="column">CREATED_AT</text>
-        <text x="1018" y="1076" class="type">TIMESTAMP</text>
-      
-        <rect x="760" y="1090" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="816" y1="1090" x2="816" y2="1128" class="cell-line"/>
-        <line x1="1002" y1="1090" x2="1002" y2="1128" class="cell-line"/>
-        <line x1="760" y1="1128" x2="1160" y2="1128" class="cell-line"/>
-        <text x="788" y="1114" text-anchor="middle" class="key"></text>
-        <text x="832" y="1114" class="column">UPDATED_AT</text>
-        <text x="1018" y="1114" class="type">TIMESTAMP</text>
-      
+      <text x="814" y="1174" text-anchor="middle" class="key-text"></text>
+      <text x="859" y="1174" class="name-text">UPDATED_AT</text>
+      <text x="1065" y="1174" class="type-text">TIMESTAMP</text>
+    
     </g>
   
-    <g id="comment" filter="url(#tableShadow)">
-      <rect x="1460" y="690" width="400" height="346" rx="2" fill="#FFFFFF" class="table-border"/>
-      <rect x="1460" y="690" width="400" height="42" rx="2" fill="#A8A8A8"/>
-      <line x1="1460" y1="732" x2="1860" y2="732" class="table-border"/>
-      <text x="1660" y="717" text-anchor="middle" class="table-title">COMMUNITY_COMMENT</text>
+    <g filter="url(#cardShadow)">
+      <rect x="1515" y="760" width="430" height="344" rx="12" fill="#FFFFFF" stroke="#C7C7CC" stroke-width="1.4"/>
+      <path d="M 1527 760 H 1933 Q 1945 760 1945 772 V 808 H 1515 V 772 Q 1515 760 1527 760" fill="#E8E8ED"/>
+      <line x1="1515" y1="808" x2="1945" y2="808" stroke="#C7C7CC" stroke-width="1.4"/>
+      <text x="1730" y="791" text-anchor="middle" class="title-text">COMMUNITY_COMMENT</text>
       
-        <rect x="1460" y="732" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="1516" y1="732" x2="1516" y2="770" class="cell-line"/>
-        <line x1="1702" y1="732" x2="1702" y2="770" class="cell-line"/>
-        <line x1="1460" y1="770" x2="1860" y2="770" class="cell-line"/>
-        <text x="1488" y="756" text-anchor="middle" class="key">PK</text>
-        <text x="1532" y="756" class="column">ID</text>
-        <text x="1718" y="756" class="type">BIGINT</text>
+      <rect x="1515" y="808" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="1573" y1="808" x2="1573" y2="845" class="rule"/>
+      <line x1="1779" y1="808" x2="1779" y2="845" class="rule"/>
+      <line x1="1515" y1="845" x2="1945" y2="845" class="rule"/>
+      <text x="1544" y="832" text-anchor="middle" class="key-text">PK</text>
+      <text x="1589" y="832" class="name-text">ID</text>
+      <text x="1795" y="832" class="type-text">BIGINT</text>
+    
+      <rect x="1515" y="845" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="1573" y1="845" x2="1573" y2="882" class="rule"/>
+      <line x1="1779" y1="845" x2="1779" y2="882" class="rule"/>
+      <line x1="1515" y1="882" x2="1945" y2="882" class="rule"/>
+      <text x="1544" y="869" text-anchor="middle" class="key-text">FK</text>
+      <text x="1589" y="869" class="name-text">POST_ID</text>
+      <text x="1795" y="869" class="type-text">BIGINT</text>
+    
+      <rect x="1515" y="882" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="1573" y1="882" x2="1573" y2="919" class="rule"/>
+      <line x1="1779" y1="882" x2="1779" y2="919" class="rule"/>
+      <line x1="1515" y1="919" x2="1945" y2="919" class="rule"/>
+      <text x="1544" y="906" text-anchor="middle" class="key-text">FK</text>
+      <text x="1589" y="906" class="name-text">PARENT_ID</text>
+      <text x="1795" y="906" class="type-text">BIGINT</text>
+    
+      <rect x="1515" y="919" width="58" height="37" fill="#F5F5F7"/>
+      <line x1="1573" y1="919" x2="1573" y2="956" class="rule"/>
+      <line x1="1779" y1="919" x2="1779" y2="956" class="rule"/>
+      <line x1="1515" y1="956" x2="1945" y2="956" class="rule"/>
+      <text x="1544" y="943" text-anchor="middle" class="key-text">FK</text>
+      <text x="1589" y="943" class="name-text">USER_ID</text>
+      <text x="1795" y="943" class="type-text">BIGINT</text>
+    
+      <rect x="1515" y="956" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="956" x2="1573" y2="993" class="rule"/>
+      <line x1="1779" y1="956" x2="1779" y2="993" class="rule"/>
+      <line x1="1515" y1="993" x2="1945" y2="993" class="rule"/>
+      <text x="1544" y="980" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="980" class="name-text">AUTHOR_NAME</text>
+      <text x="1795" y="980" class="type-text">VARCHAR(80)</text>
+    
+      <rect x="1515" y="993" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="993" x2="1573" y2="1030" class="rule"/>
+      <line x1="1779" y1="993" x2="1779" y2="1030" class="rule"/>
+      <line x1="1515" y1="1030" x2="1945" y2="1030" class="rule"/>
+      <text x="1544" y="1017" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="1017" class="name-text">CONTENT</text>
+      <text x="1795" y="1017" class="type-text">VARCHAR(1200)</text>
+    
+      <rect x="1515" y="1030" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="1030" x2="1573" y2="1067" class="rule"/>
+      <line x1="1779" y1="1030" x2="1779" y2="1067" class="rule"/>
+      <line x1="1515" y1="1067" x2="1945" y2="1067" class="rule"/>
+      <text x="1544" y="1054" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="1054" class="name-text">CREATED_AT</text>
+      <text x="1795" y="1054" class="type-text">TIMESTAMP</text>
+    
+      <rect x="1515" y="1067" width="58" height="37" fill="#FFFFFF"/>
+      <line x1="1573" y1="1067" x2="1573" y2="1104" class="rule"/>
+      <line x1="1779" y1="1067" x2="1779" y2="1104" class="rule"/>
       
-        <rect x="1460" y="770" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="1516" y1="770" x2="1516" y2="808" class="cell-line"/>
-        <line x1="1702" y1="770" x2="1702" y2="808" class="cell-line"/>
-        <line x1="1460" y1="808" x2="1860" y2="808" class="cell-line"/>
-        <text x="1488" y="794" text-anchor="middle" class="key">FK</text>
-        <text x="1532" y="794" class="column">POST_ID</text>
-        <text x="1718" y="794" class="type">BIGINT</text>
-      
-        <rect x="1460" y="808" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="1516" y1="808" x2="1516" y2="846" class="cell-line"/>
-        <line x1="1702" y1="808" x2="1702" y2="846" class="cell-line"/>
-        <line x1="1460" y1="846" x2="1860" y2="846" class="cell-line"/>
-        <text x="1488" y="832" text-anchor="middle" class="key">FK</text>
-        <text x="1532" y="832" class="column">PARENT_ID</text>
-        <text x="1718" y="832" class="type">BIGINT</text>
-      
-        <rect x="1460" y="846" width="56" height="38" fill="#F4F4F4"/>
-        <line x1="1516" y1="846" x2="1516" y2="884" class="cell-line"/>
-        <line x1="1702" y1="846" x2="1702" y2="884" class="cell-line"/>
-        <line x1="1460" y1="884" x2="1860" y2="884" class="cell-line"/>
-        <text x="1488" y="870" text-anchor="middle" class="key">FK</text>
-        <text x="1532" y="870" class="column">USER_ID</text>
-        <text x="1718" y="870" class="type">BIGINT</text>
-      
-        <rect x="1460" y="884" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="884" x2="1516" y2="922" class="cell-line"/>
-        <line x1="1702" y1="884" x2="1702" y2="922" class="cell-line"/>
-        <line x1="1460" y1="922" x2="1860" y2="922" class="cell-line"/>
-        <text x="1488" y="908" text-anchor="middle" class="key"></text>
-        <text x="1532" y="908" class="column">AUTHOR_NAME</text>
-        <text x="1718" y="908" class="type">VARCHAR(80)</text>
-      
-        <rect x="1460" y="922" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="922" x2="1516" y2="960" class="cell-line"/>
-        <line x1="1702" y1="922" x2="1702" y2="960" class="cell-line"/>
-        <line x1="1460" y1="960" x2="1860" y2="960" class="cell-line"/>
-        <text x="1488" y="946" text-anchor="middle" class="key"></text>
-        <text x="1532" y="946" class="column">CONTENT</text>
-        <text x="1718" y="946" class="type">VARCHAR(1200)</text>
-      
-        <rect x="1460" y="960" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="960" x2="1516" y2="998" class="cell-line"/>
-        <line x1="1702" y1="960" x2="1702" y2="998" class="cell-line"/>
-        <line x1="1460" y1="998" x2="1860" y2="998" class="cell-line"/>
-        <text x="1488" y="984" text-anchor="middle" class="key"></text>
-        <text x="1532" y="984" class="column">CREATED_AT</text>
-        <text x="1718" y="984" class="type">TIMESTAMP</text>
-      
-        <rect x="1460" y="998" width="56" height="38" fill="#FFFFFF"/>
-        <line x1="1516" y1="998" x2="1516" y2="1036" class="cell-line"/>
-        <line x1="1702" y1="998" x2="1702" y2="1036" class="cell-line"/>
-        <line x1="1460" y1="1036" x2="1860" y2="1036" class="cell-line"/>
-        <text x="1488" y="1022" text-anchor="middle" class="key"></text>
-        <text x="1532" y="1022" class="column">UPDATED_AT</text>
-        <text x="1718" y="1022" class="type">TIMESTAMP</text>
-      
+      <text x="1544" y="1091" text-anchor="middle" class="key-text"></text>
+      <text x="1589" y="1091" class="name-text">UPDATED_AT</text>
+      <text x="1795" y="1091" class="type-text">TIMESTAMP</text>
+    
     </g>
   
 </svg>
