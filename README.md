@@ -91,60 +91,8 @@ com.jlptcloud
 ```
 
 ## ERD
-erDiagram
-    APP_USER ||--o{ USER_WORD_STATUS : tracks
-    WORD ||--o{ USER_WORD_STATUS : has
-    COMMUNITY_POST ||--o{ COMMUNITY_COMMENT : contains
-    COMMUNITY_COMMENT ||--o{ COMMUNITY_COMMENT : replies
 
-    APP_USER {
-        bigint id PK
-        varchar username UK
-        varchar password_hash
-        timestamp created_at
-        timestamp updated_at
-    }
-
-    WORD {
-        bigint id PK
-        varchar japanese
-        varchar reading
-        varchar meaning
-        varchar part_of_speech
-        varchar example_sentence
-        varchar jlpt_level
-        varchar study_status
-    }
-
-    USER_WORD_STATUS {
-        bigint id PK
-        bigint user_id FK
-        bigint word_id FK
-        varchar study_status
-        int correct_streak
-        int wrong_count
-        int review_count
-        timestamp next_review_at
-        timestamp last_reviewed_at
-    }
-
-    COMMUNITY_POST {
-        bigint id PK
-        varchar author_name
-        varchar title
-        varchar content
-        varchar owner_key
-    }
-
-    COMMUNITY_COMMENT {
-        bigint id PK
-        bigint post_id FK
-        bigint parent_id FK
-        varchar author_name
-        varchar content
-        varchar owner_key
-    }
-
+![JLPTCloud ERD](docs/images/jlptcloud-erd.png)
 
 ## API Design
 
