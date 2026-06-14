@@ -91,8 +91,6 @@ com.jlptcloud
 ```
 
 ## ERD
-
-```mermaid
 erDiagram
     APP_USER ||--o{ USER_WORD_STATUS : tracks
     WORD ||--o{ USER_WORD_STATUS : has
@@ -146,7 +144,7 @@ erDiagram
         varchar content
         varchar owner_key
     }
-```
+
 
 ## API Design
 
