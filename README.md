@@ -1,87 +1,245 @@
 # JLPTCloud
 
-JLPTCloud is a deployed Japanese learning web service for JLPT learners. It combines a vocabulary browser, grammar note management, study progress tracking, scheduled reviews, and an authenticated community board.
+JLPTCloud is a deployed JLPT learning service for vocabulary study, spaced review, grammar notes, and learner community discussions.
 
 - Live service: https://jlptcloud.com
-- Backend: Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA
-- Database: PostgreSQL for production, H2 only for local/test profiles
-- Deployment: Docker Compose, Cloudflare, Flyway database migrations
+- Backend: Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA, Spring Security
+- Database: PostgreSQL 16 in production, H2 for tests
+- Deployment: AWS Lightsail, Docker Compose, GitHub Actions
 
 ## Overview
 
-The service is built as a portfolio project to demonstrate backend design, security hardening, deployment awareness, and maintainable CRUD-plus-domain logic.
+JLPTCloud was built to solve a common problem in language-learning portfolios: many projects stop at a static word list or a simple CRUD board. This project adds user-specific study progress, review scheduling, session-based access control, and deployment-aware backend structure.
 
-The core idea is simple: JLPT learners need more than a static word list. They need to search vocabulary by level, track their personal learning state, review weak words at the right time, store grammar patterns, and ask questions in a small community space.
+The main learning flow is:
+
+1. Users browse shared JLPT vocabulary from N5 to N1.
+2. A word is added to the user's personal review queue when they press `Studied`.
+3. From the Review Words tab, users answer `Known` or `Missed`.
+4. The service updates memory stage, memory score, review count, and next review date.
+5. Weaker words are shown earlier in the review queue.
 
 ## Why I Built This
 
-Many beginner portfolio projects stop at "board + login + CRUD." I wanted JLPTCloud to show a more realistic service shape:
+The goal was not only to make a vocabulary app, but to show backend decision-making that can be discussed in an engineering interview:
 
-- public read APIs and authenticated write APIs
-- user-specific study progress over shared vocabulary data
-- review scheduling instead of a flat status field only
-- production and local profiles separated
-- schema migration and database validation for deployment
-- tests for security boundaries and user-specific behavior
+- how to separate shared master data from user-specific learning data
+- how to model a review queue instead of a flat memorized/not-memorized flag
+- how to secure write operations with login and ownership checks
+- how to deploy a Spring Boot application with a separate PostgreSQL container
+- how to test realistic API flows with session state
+
+## Core Problems And Solutions
+
+### 1. Shared Words vs Personal Study Progress
+
+**Problem**
+
+The vocabulary list is shared by all users, but each user needs a different study state for the same word. If the study status were stored directly in the `word` table, one user's progress would affect everyone.
+
+**Solution**
+
+The project separates the shared `word` table from the user-specific `user_word_status` table.
+
+- `word`: stores Japanese word, reading, meaning, part of speech, example sentence, and JLPT level
+- `user_word_status`: stores each user's progress for each word
+
+A new user initially has no rows in `user_word_status`. When the user presses `Studied`, the application creates a row for that user and word.
+
+**Alternative Considered**
+
+Storing status directly in the `word` table would be simpler, but it would only work for a single-user app. Storing progress as JSON in the user table was also possible, but it would make filtering, indexing, and querying review items harder.
+
+**Result**
+
+The service can keep one shared vocabulary database while allowing each user to have an independent review queue and memory score.
+
+### 2. First Study vs Review Study
+
+**Problem**
+
+The first time a learner sees a word is different from later review sessions. Mixing first-pass study and review in one screen makes the workflow unclear.
+
+**Solution**
+
+The vocabulary screen is used for first-pass study. Each word has a `Studied` action. Once pressed, the word appears in the Review Words tab.
+
+The Review Words tab then uses `Known` and `Missed` actions to update the user's memory state.
+
+**Alternative Considered**
+
+The first version used a direct status change such as `NEW`, `LEARNING`, `REVIEW_NEEDED`, and `MASTERED` from the vocabulary screen. That was simple, but it did not clearly separate "I studied this once" from "I reviewed this again later."
+
+**Result**
+
+The learning flow became easier to explain:
+
+```text
+Words tab: first pass
+Review Words tab: second pass and later
+```
+
+### 3. Memory Score And Review Priority
+
+**Problem**
+
+A four-step enum alone cannot express how urgently a word should be reviewed. Two words can both be `LEARNING`, but one may have been reviewed yesterday and another may have been ignored for two weeks.
+
+**Solution**
+
+JLPTCloud uses a seven-stage review model with a decaying memory score.
+
+Review intervals:
+
+```text
+Stage 1: 1 day
+Stage 2: 4 days
+Stage 3: 7 days
+Stage 4: 14 days
+Stage 5: 30 days
+Stage 6: 60 days
+Stage 7: 90 days
+```
+
+Current memory score is calculated when the review API is called:
+
+```text
+currentMemoryScore = memoryScore * 0.7 ^ (elapsedDays / reviewIntervalDays)
+```
+
+When the user answers `Known`:
+
+- memory stage increases by 1, up to stage 7
+- memory score increases, capped at 100
+- next review date is pushed further away
+
+When the user answers `Missed`:
+
+- memory stage decreases by 2, down to stage 1
+- memory score decreases, floored at 0
+- next review date is set to the next day
+
+**Alternative Considered**
+
+A simpler implementation could sort only by `nextReviewAt`. That would be easier to query in SQL, but it would not reflect memory decay between reviews. Another option was to persist a calculated priority score, but that would require scheduled updates or more complex consistency handling.
+
+**Result**
+
+The review queue can prioritize weaker words using both user answers and elapsed time.
+
+### 4. Authentication And Ownership
+
+**Problem**
+
+Write operations need to be protected. It is not enough to check whether a user is logged in; update and delete operations also need to verify that the current user owns the resource.
+
+**Solution**
+
+The project uses session-based authentication with Spring Security.
+
+- Passwords are hashed with BCrypt.
+- The browser stores a `JSESSIONID` cookie.
+- The server session stores `LOGIN_USER_ID`.
+- A custom session filter reads the session and sets the Spring Security authentication context.
+- Protected write APIs require authentication.
+- Community post and comment update/delete operations compare the current session user id with the entity's `user_id`.
+
+**Alternative Considered**
+
+JWT could be used for a separate frontend/backend architecture. For this project, session authentication was simpler and appropriate because the frontend is served by the same Spring Boot application.
+
+**Result**
+
+Unauthenticated users can read public data, but cannot modify words, grammar notes, or community content. Community content is linked to `AppUser`, so ownership is enforced through database relationships rather than a loose string key.
+
+### 5. Community Data Model
+
+**Problem**
+
+A community board needs posts, comments, replies, and ownership checks. Replies should not require a completely separate table if they share the same behavior as comments.
+
+**Solution**
+
+The community uses two main entities:
+
+- `CommunityPost`
+- `CommunityComment`
+
+`CommunityComment` has:
+
+- `post_id`: the post it belongs to
+- `parent_id`: nullable self-reference for replies
+- `user_id`: the authenticated writer
+
+If `parent_id` is `null`, the row is a normal comment. If `parent_id` points to another comment, the row is a reply.
+
+**Alternative Considered**
+
+A separate `reply` table was possible, but it would duplicate fields and service logic. A self-referencing comment table is simpler for this level of nested discussion.
+
+**Result**
+
+The service supports posts, comments, nested replies, and writer-only update/delete rules with a compact schema.
 
 ## Main Features
 
 ### Vocabulary
 
-- JLPT N5-N1 vocabulary list loaded from CSV seed data
-- filter by JLPT level and study status
-- keyword search by Japanese word, reading, or meaning
-- user-specific study status: `NEW`, `LEARNING`, `REVIEW_NEEDED`, `MASTERED`
-- review actions: known/missed answer tracking
-- spaced-review scheduling using `nextReviewAt`
-- per-level progress dashboard
+- Browse JLPT N5-N1 vocabulary
+- Filter by JLPT level and study status
+- Search by Japanese word, reading, or meaning
+- Mark words as `Studied` for first-pass learning
+- Review studied words with `Known` and `Missed`
+- Track memory stage, memory score, review count, and next review date
+- Show lower-score words earlier in the review queue
 
 ### Grammar Notes
 
-- create, read, update, and delete grammar notes
-- store pattern, meaning, explanation, example sentence, JLPT level, and study status
-- filter grammar notes by JLPT level and study status
-- write operations require authentication
+- Create, read, update, and delete grammar notes
+- Store pattern, meaning, explanation, example sentence, JLPT level, and study status
+- Filter by JLPT level and study status
+- Require login for write operations
 
 ### Community
 
-- create, read, update, and delete posts
-- create comments and nested replies
-- edit/delete is restricted to the original authenticated writer
-- read access is public; write access requires login
+- Create, read, update, and delete posts
+- Create comments and nested replies
+- Link posts and comments to authenticated users through `user_id`
+- Allow only the original writer to update or delete their content
 
-### Authentication
+### Security
 
-- session-based login/signup
+- Session-based signup, login, logout, and current-user API
 - BCrypt password hashing
-- legacy SHA-256 hash compatibility with automatic rehash on login
-- Spring Security path-based authorization
-- JSON unauthorized/forbidden responses for API clients
+- Spring Security authorization rules
+- H2 console disabled
+- API errors returned as JSON
+- Session cookie settings include `HttpOnly`, `Secure`, and `SameSite=Lax`
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    Browser["Browser / Static HTML JS"] --> App["Spring Boot MVC App"]
-    App --> Security["Spring Security Session Filter"]
-    Security --> Controllers["REST Controllers"]
-    Controllers --> Services["Domain Services"]
-    Services --> Repositories["Spring Data JPA Repositories"]
-    Repositories --> DB["PostgreSQL"]
-    App --> Flyway["Flyway Migration"]
-    Cloudflare["Cloudflare HTTPS / DNS"] --> Browser
-```
+### Platform Landscape
+
+![JLPTCloud platform landscape](docs/images/jlptcloud-platform-landscape.png)
+
+The diagram shows the public request path through Cloudflare and the deployment path from GitHub to the production JLPTCloud service.
+
+### Database ERD
+
+![JLPTCloud ERD](docs/images/jlptcloud-erd.png)
+
+The schema separates shared vocabulary from user-specific study progress and links authenticated users to grammar notes, community posts, and nested comments.
 
 ### Package Structure
 
 ```text
 com.jlptcloud
   domain
+    community
+    grammar
+    study
     user
     word
-    grammar
-    community
-    study
   global
     api
     config
@@ -90,9 +248,7 @@ com.jlptcloud
     security
 ```
 
-## ERD
-
-![JLPTCloud ERD](docs/images/jlptcloud-erd.png)
+`domain` contains feature-specific business logic. `global` contains shared infrastructure such as API response format, security configuration, exception handling, and base entity fields.
 
 ## API Design
 
@@ -105,7 +261,7 @@ All API responses use a common envelope:
 }
 ```
 
-Error responses use:
+Error responses use the same shape:
 
 ```json
 {
@@ -127,18 +283,20 @@ Error responses use:
 ### Words
 
 - `GET /api/words`
-- `GET /api/words?jlptLevel=N2&studyStatus=LEARNING&keyword=keigo`
 - `GET /api/words/{id}`
 - `GET /api/words/dashboard`
+- `GET /api/words/review`
 - `POST /api/words`
 - `PUT /api/words/{id}`
 - `PATCH /api/words/{id}/status`
+- `PATCH /api/words/{id}/study`
 - `PATCH /api/words/{id}/review`
 - `DELETE /api/words/{id}`
 
 ### Grammar Notes
 
 - `GET /api/grammar-notes`
+- `GET /api/grammar-notes/{id}`
 - `POST /api/grammar-notes`
 - `PUT /api/grammar-notes/{id}`
 - `DELETE /api/grammar-notes/{id}`
@@ -150,97 +308,81 @@ Error responses use:
 - `POST /api/community/posts`
 - `PUT /api/community/posts/{postId}`
 - `DELETE /api/community/posts/{postId}`
-- `POST /api/community/posts/{postId}/comments`
 - `GET /api/community/posts/{postId}/comments`
+- `POST /api/community/posts/{postId}/comments`
 - `PUT /api/community/comments/{commentId}`
 - `DELETE /api/community/comments/{commentId}`
 
-## Security
-
-Security improvements implemented for portfolio review:
-
-- Spring Security introduced
-- BCrypt password hashing
-- old SHA-256 hashes can be upgraded on successful login
-- `/h2-console` is denied and H2 console is disabled
-- production profile uses PostgreSQL and `ddl-auto=validate`
-- write operations require authenticated sessions
-- community post/comment edit and delete operations validate ownership
-- session cookie settings include `HttpOnly`, `Secure`, and `SameSite=Lax`
-- API authorization failures return JSON instead of an HTML error page
-
-## Database And Migration
-
-Production uses PostgreSQL with Flyway:
-
-- migration file: `src/main/resources/db/migration/V1__init_schema.sql`
-- app startup validates entity/schema consistency with `spring.jpa.hibernate.ddl-auto=validate`
-- search-related indexes are added for vocabulary lookup
-- user progress indexes are added for due-review queries
-
-Local development can use H2 with the `local` profile:
-
-```powershell
-.\gradlew.bat bootRun --args='--spring.profiles.active=local'
-```
-
-## Deployment
-
-Docker Compose starts the application and PostgreSQL:
-
-```powershell
-$env:JLPTCLOUD_DB_PASSWORD="change-this-password"
-docker compose up --build -d
-```
-
-Services:
-
-- `jlptcloud`: Spring Boot app on container port `8080`
-- `postgres`: PostgreSQL 16 with a persistent Docker volume
-
-The public domain is served through Cloudflare.
-
-
 ## Testing
 
-The test suite covers:
+The project uses Spring Boot tests with MockMvc. The tests send HTTP-like requests through the Spring MVC layer without manually starting a browser or external server.
 
-- signup and session creation
-- vocabulary pagination/filtering
-- user-specific word status filtering
-- unauthorized write rejection
-- spaced-review scheduling
-- dashboard response shape
-- community comment ownership enforcement
+Covered cases include:
 
-Run:
+- signup creates a session and returns the normalized username
+- vocabulary list supports JLPT level filtering and pagination
+- unauthenticated users cannot modify word state or create words
+- authenticated users can mark words as studied
+- studied words appear in the review queue
+- review answers update memory score, review count, and next review date
+- lower memory score words are prioritized in the review queue
+- community comments can only be deleted by their original writer
+
+Run tests locally:
 
 ```powershell
 .\gradlew.bat test
 ```
 
-If the project is stored under a Windows path with non-ASCII characters and Gradle test workers cannot resolve classpaths, map the project to an ASCII drive path before running tests:
+## Deployment
 
-```powershell
-subst J: "C:\path\to\JLPTCloud"
-J:
-.\gradlew.bat clean test
-subst J: /D
+The service is deployed to AWS Lightsail with Docker Compose.
+
+```text
+GitHub push to main
+-> GitHub Actions runner starts
+-> repository checkout
+-> Java 21 setup
+-> ./gradlew clean bootJar
+-> app.jar is uploaded to the Lightsail server
+-> Docker Compose rebuilds and restarts the app
+-> smoke checks verify / and /api/words
 ```
 
-## What I Learned
+Docker Compose runs two containers:
 
-- how to separate local and production database settings
-- how to move from simple CRUD to user-specific domain behavior
-- how to design authorization around ownership, not only login state
-- how Flyway migrations make deployment more reliable than `ddl-auto=update`
-- how tests reveal security regressions after adding authentication
+- `jlptcloud`: Spring Boot application container
+- `postgres`: PostgreSQL 16 database container
+
+Important port settings:
+
+```text
+Host port 80 -> Spring Boot container port 8080
+Spring Boot -> PostgreSQL at postgres:5432 inside the Docker network
+```
+
+Sensitive values such as the Lightsail SSH key and database password are stored in GitHub Actions Secrets and injected during deployment.
+
+## Current Limitations
+
+- The GitHub Actions workflow currently builds and deploys the application, but test execution is not yet used as a deployment gate.
+- Review queue scoring is calculated in Java memory after loading the user's studied words. This is acceptable for the current portfolio scale, but should be optimized for larger datasets.
+- The frontend is a static HTML/CSS/JavaScript application served by Spring Boot, so it is simple but less modular than a modern SPA.
+- Session data uses the default server-side session approach. For multi-instance deployment, an external session store such as Redis would be needed.
 
 ## Future Improvements
 
-- replace session login with OAuth2 or JWT depending on client architecture
-- add admin-only vocabulary import with validation reports
-- add full-text search ranking and typo tolerance
-- add review notification emails or scheduled reminders
-- add observability with actuator metrics and structured logs
-- add CI pipeline for test/build/deploy automation
+- Add `./gradlew clean test` to GitHub Actions before deployment
+- Optimize review queue queries with database-side filtering for due items
+- Add admin CSV import with validation reports
+- Add more focused unit tests for the memory score algorithm
+- Add observability with Spring Actuator metrics and structured logs
+- Add richer community features such as search, likes, and moderation
+
+## What I Learned
+
+- A useful learning service needs user-specific state, not only shared master data.
+- Ownership checks should be based on authenticated user relationships, not request text.
+- A review system is easier to explain when first study and later review are separated.
+- Docker Compose makes it clear how the app container and database container communicate.
+- MockMvc is useful for testing session-based API behavior without starting a full external server.
