@@ -9,25 +9,33 @@ JLPTCloud is a deployed JLPT learning service for vocabulary study, spaced revie
 
 ## Overview
 
-JLPTCloud was built to solve a common problem in language-learning portfolios: many projects stop at a static word list or a simple CRUD board. This project adds user-specific study progress, review scheduling, session-based access control, and deployment-aware backend structure.
+JLPTCloud is a deployed, personalized JLPT vocabulary review service. It helps learners decide not only what a Japanese word means, but **what they should review next**.
 
-The main learning flow is:
+![JLPTCloud personalized review queue](docs/images/jlptcloud-review-queue.png)
 
-1. Users browse shared JLPT vocabulary from N5 to N1.
-2. A word is added to the user's personal review queue when they press `Studied`.
-3. From the Review Words tab, users answer `Known` or `Missed`.
-4. The service updates memory stage, memory score, review count, and next review date.
-5. Weaker words are shown earlier in the review queue.
+The learning flow is simple:
+
+1. Browse shared vocabulary from N5 to N1.
+2. Press `Studied` to add a word to a personal review queue.
+3. Review the word later with `Known` or `Missed`.
+4. Let the service update memory score, review stage, review count, and next review date.
+5. Return to weaker words first because lower memory scores receive higher priority.
+
+The review screen shows the Japanese word, reading, Korean meaning, JLPT level, live memory score, seven-stage progress, and scheduled review date in one place. JLPTCloud also provides grammar-note management and an authenticated community with posts, comments, and replies.
 
 ## Why I Built This
 
-The goal was not only to make a vocabulary app, but to show backend decision-making that can be discussed in an engineering interview:
+Most vocabulary applications stop after storing words and toggling a `memorized` flag. The difficult part of learning, however, is that memory is personal and changes over time. Two learners can study the same word but need to review it at completely different moments.
 
-- how to separate shared master data from user-specific learning data
-- how to model a review queue instead of a flat memorized/not-memorized flag
-- how to secure write operations with login and ownership checks
-- how to deploy a Spring Boot application with a separate PostgreSQL container
-- how to test realistic API flows with session state
+I built JLPTCloud to model that difference directly. Vocabulary is shared, but progress belongs to each user-word pair. A learner's answers and elapsed time continuously affect memory score, review stage, and scheduling instead of collapsing progress into a single boolean value.
+
+That product requirement shaped the backend:
+
+- separate shared `Word` data from personal `UserWordStatus`
+- rank a review queue using memory score, scheduled date, and stable tie-breaking
+- protect personal progress and community writes with session authentication and ownership checks
+- test complete request flows with `MockMvc` and `MockHttpSession`
+- run the Spring Boot application and PostgreSQL as separate production containers
 
 ## Core Problems And Solutions
 
