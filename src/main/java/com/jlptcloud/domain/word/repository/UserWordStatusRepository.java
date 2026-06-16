@@ -32,8 +32,46 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
                     join fetch uws.word w
                     where uws.user.id = :userId
                       and uws.studied = true
-                      and (:jlptLevel is null or w.jlptLevel = :jlptLevel)
-                      and (:keyword is null or lower(w.japanese) like lower(concat('%', :keyword, '%'))
+                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
+                    """,
+            countQuery = """
+                    select count(uws) from UserWordStatus uws
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                    """
+    )
+    Page<UserWordStatus> findReviewPage(@Param("userId") Long userId, Pageable pageable);
+
+    @Query(
+            value = """
+                    select uws from UserWordStatus uws
+                    join fetch uws.word w
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                      and w.jlptLevel = :jlptLevel
+                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
+                    """,
+            countQuery = """
+                    select count(uws) from UserWordStatus uws
+                    join uws.word w
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                      and w.jlptLevel = :jlptLevel
+                    """
+    )
+    Page<UserWordStatus> findReviewPageByLevel(
+            @Param("userId") Long userId,
+            @Param("jlptLevel") JlptLevel jlptLevel,
+            Pageable pageable
+    );
+
+    @Query(
+            value = """
+                    select uws from UserWordStatus uws
+                    join fetch uws.word w
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                      and (lower(w.japanese) like lower(concat('%', :keyword, '%'))
                            or lower(w.reading) like lower(concat('%', :keyword, '%'))
                            or lower(w.meaning) like lower(concat('%', :keyword, '%')))
                     order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
@@ -43,13 +81,41 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
                     join uws.word w
                     where uws.user.id = :userId
                       and uws.studied = true
-                      and (:jlptLevel is null or w.jlptLevel = :jlptLevel)
-                      and (:keyword is null or lower(w.japanese) like lower(concat('%', :keyword, '%'))
+                      and (lower(w.japanese) like lower(concat('%', :keyword, '%'))
                            or lower(w.reading) like lower(concat('%', :keyword, '%'))
                            or lower(w.meaning) like lower(concat('%', :keyword, '%')))
                     """
     )
-    Page<UserWordStatus> findReviewPage(
+    Page<UserWordStatus> findReviewPageByKeyword(
+            @Param("userId") Long userId,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
+
+    @Query(
+            value = """
+                    select uws from UserWordStatus uws
+                    join fetch uws.word w
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                      and w.jlptLevel = :jlptLevel
+                      and (lower(w.japanese) like lower(concat('%', :keyword, '%'))
+                           or lower(w.reading) like lower(concat('%', :keyword, '%'))
+                           or lower(w.meaning) like lower(concat('%', :keyword, '%')))
+                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
+                    """,
+            countQuery = """
+                    select count(uws) from UserWordStatus uws
+                    join uws.word w
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                      and w.jlptLevel = :jlptLevel
+                      and (lower(w.japanese) like lower(concat('%', :keyword, '%'))
+                           or lower(w.reading) like lower(concat('%', :keyword, '%'))
+                           or lower(w.meaning) like lower(concat('%', :keyword, '%')))
+                    """
+    )
+    Page<UserWordStatus> findReviewPageByLevelAndKeyword(
             @Param("userId") Long userId,
             @Param("jlptLevel") JlptLevel jlptLevel,
             @Param("keyword") String keyword,

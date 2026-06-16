@@ -145,8 +145,26 @@ public class WordService {
         LocalDateTime now = LocalDateTime.now();
         String normalizedKeyword = normalizeKeyword(keyword);
 
-        return userWordStatusRepository.findReviewPage(user.getId(), jlptLevel, normalizedKeyword, pageable)
+        return findReviewStatuses(user.getId(), jlptLevel, normalizedKeyword, pageable)
                 .map(status -> WordResponse.from(status.getWord(), status, now));
+    }
+
+    private Page<UserWordStatus> findReviewStatuses(
+            Long userId,
+            JlptLevel jlptLevel,
+            String keyword,
+            Pageable pageable
+    ) {
+        if (jlptLevel != null && keyword != null) {
+            return userWordStatusRepository.findReviewPageByLevelAndKeyword(userId, jlptLevel, keyword, pageable);
+        }
+        if (jlptLevel != null) {
+            return userWordStatusRepository.findReviewPageByLevel(userId, jlptLevel, pageable);
+        }
+        if (keyword != null) {
+            return userWordStatusRepository.findReviewPageByKeyword(userId, keyword, pageable);
+        }
+        return userWordStatusRepository.findReviewPage(userId, pageable);
     }
 
     public StudyProgressResponse getProgress(Long userId) {
