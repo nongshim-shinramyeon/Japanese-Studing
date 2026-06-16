@@ -10,6 +10,7 @@ async function request(url, options = {}) {
 
     const response = await fetch(url, {
         ...options,
+        credentials: "same-origin",
         headers
     });
 

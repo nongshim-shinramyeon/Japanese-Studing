@@ -10,6 +10,7 @@ import com.jlptcloud.domain.word.dto.response.WordResponse;
 import com.jlptcloud.domain.word.service.WordService;
 import com.jlptcloud.domain.user.controller.AuthController;
 import com.jlptcloud.global.api.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -52,9 +53,10 @@ public class WordController {
             @RequestParam(required = false) StudyStatus studyStatus,
             @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable,
-            HttpSession session
+            HttpServletRequest request
     ) {
-        Long userId = (Long) session.getAttribute(AuthController.SESSION_USER_ID);
+        HttpSession session = request.getSession(false);
+        Long userId = session == null ? null : (Long) session.getAttribute(AuthController.SESSION_USER_ID);
         return ResponseEntity.ok(ApiResponse.success(wordService.getWords(jlptLevel, studyStatus, keyword, userId, pageable)));
     }
 

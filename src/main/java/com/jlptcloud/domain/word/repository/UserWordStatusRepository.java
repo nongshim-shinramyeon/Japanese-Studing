@@ -8,8 +8,12 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, Long> {
 
@@ -21,6 +25,36 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
 
     @EntityGraph(attributePaths = "word")
     List<UserWordStatus> findByUser_IdAndStudiedTrue(Long userId);
+
+    @Query(
+            value = """
+                    select uws from UserWordStatus uws
+                    join fetch uws.word w
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                      and (:jlptLevel is null or w.jlptLevel = :jlptLevel)
+                      and (:keyword is null or lower(w.japanese) like lower(concat('%', :keyword, '%'))
+                           or lower(w.reading) like lower(concat('%', :keyword, '%'))
+                           or lower(w.meaning) like lower(concat('%', :keyword, '%')))
+                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
+                    """,
+            countQuery = """
+                    select count(uws) from UserWordStatus uws
+                    join uws.word w
+                    where uws.user.id = :userId
+                      and uws.studied = true
+                      and (:jlptLevel is null or w.jlptLevel = :jlptLevel)
+                      and (:keyword is null or lower(w.japanese) like lower(concat('%', :keyword, '%'))
+                           or lower(w.reading) like lower(concat('%', :keyword, '%'))
+                           or lower(w.meaning) like lower(concat('%', :keyword, '%')))
+                    """
+    )
+    Page<UserWordStatus> findReviewPage(
+            @Param("userId") Long userId,
+            @Param("jlptLevel") JlptLevel jlptLevel,
+            @Param("keyword") String keyword,
+            Pageable pageable
+    );
 
     long countByUser_IdAndStudyStatus(Long userId, StudyStatus studyStatus);
 

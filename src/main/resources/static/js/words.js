@@ -23,6 +23,7 @@ let currentKeyword = "";
 let currentPage = 0;
 let totalPages = 1;
 let currentPageSize = 25;
+let signedIn = false;
 
 function escapeHtml(value) {
     return String(value ?? "")
@@ -95,6 +96,10 @@ function renderRows(page) {
     for (const word of items) {
         const row = document.createElement("tr");
         const studied = Boolean(word.studied);
+        const buttonLabel = signedIn ? "Studied" : "Log in to study";
+        const statusLabel = signedIn
+            ? (studied ? "In review queue" : "First pass")
+            : "Login required";
         row.innerHTML = `
             <td><strong>${escapeHtml(word.japanese)}</strong></td>
             <td>${escapeHtml(word.reading)}</td>
@@ -105,8 +110,8 @@ function renderRows(page) {
                     <button type="button"
                             class="${studied ? "secondary" : "primary"}"
                             data-study-word-id="${escapeHtml(word.id)}"
-                            ${studied ? "disabled" : ""}>${studied ? "Studied" : "Studied"}</button>
-                    <span class="table-note">${studied ? "In review queue" : "First pass"}</span>
+                            ${signedIn && studied ? "disabled" : ""}>${buttonLabel}</button>
+                    <span class="table-note">${statusLabel}</span>
                 </div>
             </td>
         `;
@@ -149,6 +154,11 @@ async function loadWords(page = 0) {
 }
 
 async function handleStudiedClick(event) {
+    if (!signedIn) {
+        window.location.href = "/login.html";
+        return;
+    }
+
     const button = event.currentTarget;
     button.disabled = true;
 
@@ -167,6 +177,7 @@ async function handleStudiedClick(event) {
 async function ensureLoggedIn() {
     try {
         const user = await fetchCollection("/api/auth/me");
+        signedIn = true;
         currentUser.textContent = user.username;
         authLink.textContent = "Logout";
         authLink.href = "#";
@@ -175,8 +186,13 @@ async function ensureLoggedIn() {
             await createResource("/api/auth/logout", {});
             window.location.href = "/login.html";
         });
+        return user;
     } catch {
-        window.location.href = "/login.html";
+        signedIn = false;
+        currentUser.textContent = "Guest";
+        authLink.textContent = "Login";
+        authLink.href = "/login.html";
+        return null;
     }
 }
 
@@ -217,6 +233,10 @@ nextButton.addEventListener("click", async () => {
 });
 
 renderActiveLevel();
-await ensureLoggedIn();
-await loadDashboard();
+const user = await ensureLoggedIn();
+if (user) {
+    loadDashboard();
+} else {
+    renderDashboard(null);
+}
 loadWords();

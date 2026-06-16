@@ -17,7 +17,6 @@ import com.jlptcloud.domain.word.repository.WordRepository;
 import com.jlptcloud.global.exception.BusinessException;
 import com.jlptcloud.global.exception.ErrorCode;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -146,18 +145,8 @@ public class WordService {
         LocalDateTime now = LocalDateTime.now();
         String normalizedKeyword = normalizeKeyword(keyword);
 
-        List<WordResponse> responses = userWordStatusRepository.findByUser_IdAndStudiedTrue(user.getId())
-                .stream()
-                .filter(status -> jlptLevel == null || status.getWord().getJlptLevel() == jlptLevel)
-                .filter(status -> normalizedKeyword == null || matchesKeyword(status.getWord(), normalizedKeyword))
-                .map(status -> WordResponse.from(status.getWord(), status, now))
-                .sorted(Comparator
-                        .comparing(WordResponse::currentMemoryScore)
-                        .thenComparing(response -> response.nextReviewAt() == null ? LocalDateTime.MAX : response.nextReviewAt())
-                        .thenComparing(WordResponse::id))
-                .toList();
-
-        return paginateResponses(responses, pageable);
+        return userWordStatusRepository.findReviewPage(user.getId(), jlptLevel, normalizedKeyword, pageable)
+                .map(status -> WordResponse.from(status.getWord(), status, now));
     }
 
     public StudyProgressResponse getProgress(Long userId) {

@@ -248,5 +248,5 @@ nextButton.addEventListener("click", async () => {
 
 renderActiveLevel();
 await ensureLoggedIn();
-await loadDashboard();
+loadDashboard();
 loadReviewWords();
