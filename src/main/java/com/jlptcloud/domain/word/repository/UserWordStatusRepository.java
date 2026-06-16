@@ -17,6 +17,22 @@ import org.springframework.data.repository.query.Param;
 
 public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, Long> {
 
+    String CURRENT_MEMORY_SCORE_ORDER = """
+            case
+                when uws.lastReviewedAt is null or uws.lastReviewedAt > :now then uws.memoryScore
+                else uws.memoryScore * power(0.7, (timestampdiff(minute, uws.lastReviewedAt, :now) / 1440.0) /
+                    case uws.memoryStage
+                        when 1 then 1.0
+                        when 2 then 4.0
+                        when 3 then 7.0
+                        when 4 then 14.0
+                        when 5 then 30.0
+                        when 6 then 60.0
+                        else 90.0
+                    end)
+            end asc, uws.nextReviewAt asc, w.id asc
+            """;
+
     @EntityGraph(attributePaths = "word")
     Optional<UserWordStatus> findByUser_IdAndWord_Id(Long userId, Long wordId);
 
@@ -32,15 +48,18 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
                     join fetch uws.word w
                     where uws.user.id = :userId
                       and uws.studied = true
-                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
-                    """,
+                    order by """ + " " + CURRENT_MEMORY_SCORE_ORDER,
             countQuery = """
                     select count(uws) from UserWordStatus uws
                     where uws.user.id = :userId
                       and uws.studied = true
                     """
     )
-    Page<UserWordStatus> findReviewPage(@Param("userId") Long userId, Pageable pageable);
+    Page<UserWordStatus> findReviewPage(
+            @Param("userId") Long userId,
+            @Param("now") LocalDateTime now,
+            Pageable pageable
+    );
 
     @Query(
             value = """
@@ -49,8 +68,7 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
                     where uws.user.id = :userId
                       and uws.studied = true
                       and w.jlptLevel = :jlptLevel
-                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
-                    """,
+                    order by """ + " " + CURRENT_MEMORY_SCORE_ORDER,
             countQuery = """
                     select count(uws) from UserWordStatus uws
                     join uws.word w
@@ -62,6 +80,7 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
     Page<UserWordStatus> findReviewPageByLevel(
             @Param("userId") Long userId,
             @Param("jlptLevel") JlptLevel jlptLevel,
+            @Param("now") LocalDateTime now,
             Pageable pageable
     );
 
@@ -74,8 +93,7 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
                       and (lower(w.japanese) like lower(concat('%', :keyword, '%'))
                            or lower(w.reading) like lower(concat('%', :keyword, '%'))
                            or lower(w.meaning) like lower(concat('%', :keyword, '%')))
-                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
-                    """,
+                    order by """ + " " + CURRENT_MEMORY_SCORE_ORDER,
             countQuery = """
                     select count(uws) from UserWordStatus uws
                     join uws.word w
@@ -89,6 +107,7 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
     Page<UserWordStatus> findReviewPageByKeyword(
             @Param("userId") Long userId,
             @Param("keyword") String keyword,
+            @Param("now") LocalDateTime now,
             Pageable pageable
     );
 
@@ -102,8 +121,7 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
                       and (lower(w.japanese) like lower(concat('%', :keyword, '%'))
                            or lower(w.reading) like lower(concat('%', :keyword, '%'))
                            or lower(w.meaning) like lower(concat('%', :keyword, '%')))
-                    order by uws.memoryScore asc, uws.nextReviewAt asc, w.id asc
-                    """,
+                    order by """ + " " + CURRENT_MEMORY_SCORE_ORDER,
             countQuery = """
                     select count(uws) from UserWordStatus uws
                     join uws.word w
@@ -119,6 +137,7 @@ public interface UserWordStatusRepository extends JpaRepository<UserWordStatus, 
             @Param("userId") Long userId,
             @Param("jlptLevel") JlptLevel jlptLevel,
             @Param("keyword") String keyword,
+            @Param("now") LocalDateTime now,
             Pageable pageable
     );
 
