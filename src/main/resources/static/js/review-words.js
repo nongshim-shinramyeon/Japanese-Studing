@@ -44,12 +44,12 @@ function clearMessage() {
     messageBox.textContent = "";
 }
 
-function formatDate(dateTime) {
+function formatLastReviewedDate(dateTime) {
     if (!dateTime) {
-        return "Next: not scheduled";
+        return "Last: not reviewed";
     }
 
-    return `Next: ${new Date(dateTime).toLocaleDateString()}`;
+    return `Last: ${new Date(dateTime).toLocaleDateString()}`;
 }
 
 function scoreClass(score) {
@@ -127,7 +127,7 @@ function renderRows(page) {
                     <div class="score-meter ${scoreClass(score)}">
                         <span style="width: ${Math.max(0, Math.min(100, score))}%"></span>
                     </div>
-                    <span class="table-note">${escapeHtml(formatDate(word.nextReviewAt))}</span>
+                    <span class="table-note">${escapeHtml(formatLastReviewedDate(word.lastReviewedAt))}</span>
                 </div>
             </td>
             <td>
