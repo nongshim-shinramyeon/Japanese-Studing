@@ -33,6 +33,7 @@ That product requirement shaped the backend:
 
 - separate shared `Word` data from personal `UserWordStatus`
 - rank a review queue using memory score, scheduled date, and stable tie-breaking
+- load review rows with the related `Word` data to avoid N+1 query behavior
 - protect personal progress and community writes with session authentication and ownership checks
 - test complete request flows with `MockMvc` and `MockHttpSession`
 - run the Spring Boot application and PostgreSQL as separate production containers
@@ -95,7 +96,9 @@ A four-step enum alone cannot express how urgently a word should be reviewed. Tw
 
 **Solution**
 
-JLPTCloud uses a seven-stage review model with a decaying memory score.
+JLPTCloud uses a seven-stage review model inspired by the forgetting curve: memory becomes less reliable as time passes, so the service recalculates the current memory score when the review queue is requested.
+
+Instead of storing only a fixed status such as `memorized`, each user-word pair keeps a memory stage, memory score, review count, last reviewed time, and next review date.
 
 Review intervals:
 
@@ -135,7 +138,32 @@ A simpler implementation could sort only by `nextReviewAt`. That would be easier
 
 The review queue can prioritize weaker words using both user answers and elapsed time.
 
-### 4. Authentication And Ownership
+### 4. Review Queue Data Loading And Transactions
+
+**Problem**
+
+The review queue screen does not show only personal progress. Each row needs shared word data such as Japanese text, reading, meaning, and JLPT level together with user-specific data such as memory score, memory stage, review count, and next review date.
+
+If progress rows are loaded first and each word is accessed lazily one by one, the screen can fall into an N+1 query pattern. Review actions also update several fields at once, so partial updates would make the learner's state inconsistent.
+
+**Solution**
+
+The `UserWordStatusRepository` uses `@EntityGraph(attributePaths = "word")` for review-related queries, so user progress is loaded with the required `Word` data instead of triggering one extra lazy query per row.
+
+Review actions such as `Known` and `Missed` are handled inside a service transaction. A single answer can update:
+
+- memory stage
+- memory score
+- correct or wrong count
+- review count
+- last reviewed time
+- next review date
+
+**Result**
+
+The review queue is easier to reason about: data loading is predictable, and each review answer is saved as one consistent state change.
+
+### 5. Authentication And Ownership
 
 **Problem**
 
@@ -160,7 +188,7 @@ JWT could be used for a separate frontend/backend architecture. For this project
 
 Unauthenticated users can read public data, but cannot modify words, grammar notes, or community content. Community content is linked to `AppUser`, so ownership is enforced through database relationships rather than a loose string key.
 
-### 5. Community Data Model
+### 6. Community Data Model
 
 **Problem**
 
