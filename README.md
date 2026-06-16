@@ -4,7 +4,7 @@ JLPTCloud is a deployed JLPT learning service for vocabulary study, spaced revie
 
 - Live service: https://jlptcloud.com
 - Backend: Java 21, Spring Boot 4, Spring Web MVC, Spring Data JPA, Spring Security
-- Database: PostgreSQL 16 in production, H2 for tests
+- Database: PostgreSQL 16
 - Deployment: AWS Lightsail, Docker Compose, GitHub Actions
 
 ## Overview
@@ -282,7 +282,6 @@ The service supports posts, comments, nested replies, and writer-only update/del
 - Session-based signup, login, logout, and current-user API
 - BCrypt password hashing
 - Spring Security authorization rules
-- H2 console disabled
 - API errors returned as JSON
 - Session cookie settings include `HttpOnly`, `Secure`, and `SameSite=Lax`
 
