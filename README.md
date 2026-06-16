@@ -38,6 +38,40 @@ That product requirement shaped the backend:
 - test complete request flows with `MockMvc` and `MockHttpSession`
 - run the Spring Boot application and PostgreSQL as separate production containers
 
+## Architecture At A Glance
+
+### Platform Landscape
+
+![JLPTCloud platform landscape](docs/images/jlptcloud-platform-landscape.png)
+
+This diagram shows how learner traffic reaches the deployed service and how releases move from GitHub Actions to the production runtime.
+
+### Database ERD
+
+![JLPTCloud ERD](docs/images/jlptcloud-erd.png)
+
+The schema separates shared vocabulary from user-specific review state. `USER_WORD_STATUS` works as a join entity between `APP_USER` and `WORD`, while also storing memory score, review stage, and next review date.
+
+### Package Structure
+
+```text
+com.jlptcloud
+  domain
+    community
+    grammar
+    study
+    user
+    word
+  global
+    api
+    config
+    entity
+    exception
+    security
+```
+
+`domain` contains feature-specific business logic. `global` contains shared infrastructure such as API response format, security configuration, exception handling, and base entity fields.
+
 ## Core Problems And Solutions
 
 ### 1. Shared Words vs Personal Study Progress
@@ -251,40 +285,6 @@ The service supports posts, comments, nested replies, and writer-only update/del
 - H2 console disabled
 - API errors returned as JSON
 - Session cookie settings include `HttpOnly`, `Secure`, and `SameSite=Lax`
-
-## Architecture
-
-### Platform Landscape
-
-![JLPTCloud platform landscape](docs/images/jlptcloud-platform-landscape.png)
-
-The diagram shows the public request path through Cloudflare and the deployment path from GitHub to the production JLPTCloud service.
-
-### Database ERD
-
-![JLPTCloud ERD](docs/images/jlptcloud-erd.png)
-
-The schema separates shared vocabulary from user-specific study progress and links authenticated users to grammar notes, community posts, and nested comments.
-
-### Package Structure
-
-```text
-com.jlptcloud
-  domain
-    community
-    grammar
-    study
-    user
-    word
-  global
-    api
-    config
-    entity
-    exception
-    security
-```
-
-`domain` contains feature-specific business logic. `global` contains shared infrastructure such as API response format, security configuration, exception handling, and base entity fields.
 
 ## API Design
 
